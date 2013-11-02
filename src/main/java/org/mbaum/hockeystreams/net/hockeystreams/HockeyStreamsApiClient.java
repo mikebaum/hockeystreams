@@ -1,9 +1,7 @@
 package org.mbaum.hockeystreams.net.hockeystreams;
 
 import java.io.IOException;
-import java.io.InputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -14,9 +12,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.mbaum.common.net.HttpClientUtils;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
 import org.mbaum.hockeystreams.net.hockeystreams.transferobject.GetLiveResponse;
 import org.mbaum.hockeystreams.net.hockeystreams.transferobject.IpExceptionResponse;
@@ -24,7 +20,7 @@ import org.mbaum.hockeystreams.net.hockeystreams.transferobject.LoginResponse;
 
 public class HockeyStreamsApiClient
 {
-    private static final Logger LOGGER = Logger.getLogger( HockeyStreamsApiClient.class );
+    public static final Logger LOGGER = Logger.getLogger( HockeyStreamsApiClient.class );
 
     private static final String HOCKEYSTREAMS_API_URL = "https://api.hockeystreams.com";
     
@@ -40,7 +36,7 @@ public class HockeyStreamsApiClient
 
         try
         {
-            return parseResponse( doPost( actionPath, entityString ), LoginResponse.class );
+            return HttpClientUtils.parseResponse( doPost( actionPath, entityString ), LoginResponse.class );
         }
         catch ( Exception e )
         {
@@ -56,7 +52,7 @@ public class HockeyStreamsApiClient
 
         try
         {
-            IpExceptionResponse ipExceptionResponse = parseResponse( doPost( actionPath, entityString ), 
+            IpExceptionResponse ipExceptionResponse = HttpClientUtils.parseResponse( doPost( actionPath, entityString ), 
                                                                      IpExceptionResponse.class );
 
             LOGGER.info( actionPath + " request result: " + ipExceptionResponse );
@@ -88,7 +84,7 @@ public class HockeyStreamsApiClient
 
             LOGGER.info( "GET request: " + GET_LIVE_PATH + " succeeded" );
             
-            GetLiveResponse getLiveResult = parseResponse( response, GetLiveResponse.class );
+            GetLiveResponse getLiveResult = HttpClientUtils.parseResponse( response, GetLiveResponse.class );
             
             LOGGER.info( GET_LIVE_PATH + " parsed result: " + getLiveResult );
         }
@@ -115,18 +111,5 @@ public class HockeyStreamsApiClient
         LOGGER.info( "POST request: " + actionPath + " succeeded" );
         
         return response;
-    }
-
-    private static <R> R parseResponse( HttpResponse response, Class<R> responseClass ) 
-        throws JsonParseException, JsonMappingException, IOException 
-    {
-        InputStream responseStream = response.getEntity().getContent();
-        
-        String responseString = IOUtils.toString( responseStream );
-        LOGGER.info( "parsing response: " + responseString );
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        return mapper.readValue( responseString, responseClass );
     }
 }
