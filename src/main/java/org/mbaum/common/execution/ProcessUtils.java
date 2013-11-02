@@ -9,14 +9,14 @@ public class ProcessUtils
 {
     private static final Logger LOGGER = Logger.getLogger( ProcessUtils.class );
     
-    public static <C extends ProcessContext> ExecutableProcess createExecutableProcess( final Process<C> process,
-                                                                                        final C context,
-                                                                                        final ProcessListener... listeners )
+    public static <C extends ProcessContext, R> ExecutableProcess<R> createExecutableProcess( Process<C, R> process,
+    																					      C context,
+                                                                                              ProcessListener<R> listener )
     {
-        return ExecutableProcessImpl.createExecutableProcess( process, context, listeners );
+        return ExecutableProcessImpl.createExecutableProcess( process, context, listener );
     }
     
-    public static Runnable createExecutbleProcessRunnable( final ExecutableProcess executableProcess )
+    public static <R> Runnable createExecutbleProcessRunnable( final ExecutableProcess<R> executableProcess )
     {
         return new Runnable()
         {

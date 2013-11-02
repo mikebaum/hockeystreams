@@ -1,4 +1,4 @@
-package org.mbaum.hockeystreams;
+package org.mbaum.common;
 
 public interface Destroyable
 {

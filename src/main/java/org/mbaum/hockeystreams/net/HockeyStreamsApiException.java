@@ -1,4 +1,4 @@
-package org.mbaum.hockeystreams.net.hockeystreams;
+package org.mbaum.hockeystreams.net;
 
 public class HockeyStreamsApiException extends Exception
 {

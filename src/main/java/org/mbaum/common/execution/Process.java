@@ -1,9 +1,9 @@
 package org.mbaum.common.execution;
 
 
-public interface Process<C extends ProcessContext>
+public interface Process<C extends ProcessContext, R>
 {
-    void execute( C context ) throws Exception;
+    R execute( C context ) throws Exception;
     
     boolean canExecuteWith( C context );
     

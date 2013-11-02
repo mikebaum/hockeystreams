@@ -1,5 +1,7 @@
 package org.mbaum.common.action;
 
+import static org.mbaum.common.action.ActionExecutableImpl.createActionExecutable;
+
 import java.awt.event.ActionEvent;
 import java.util.concurrent.Executor;
 
@@ -13,9 +15,9 @@ public final class ActionUtils
 {
     private ActionUtils(){}
     
-    public static ActionExecutable buildActionExecutable( ExecutableProcess executableProcess, Executor executor )
+    public static ActionExecutable buildActionExecutable( ExecutableProcess<?> executableProcess, Executor executor )
     {
-        return new ActionExecutableImpl( executableProcess, executor );
+        return createActionExecutable( executableProcess, executor );
     }
 
     @SuppressWarnings("serial")

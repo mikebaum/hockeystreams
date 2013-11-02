@@ -1,6 +1,7 @@
 package org.mbaum.hockeystreams.model;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mbaum.common.model.AbstractModel;
 
 public class LoginPanelModel extends AbstractModel<LoginPanelModel>
 {
@@ -25,7 +26,7 @@ public class LoginPanelModel extends AbstractModel<LoginPanelModel>
 			return;
 		
 		mUsername = username;
-		notifyListener( this );
+		notifyListeners( this );
 	}
 	
 	public String getPassword()
@@ -39,7 +40,7 @@ public class LoginPanelModel extends AbstractModel<LoginPanelModel>
 			return;
 		
 		mPassword = password;
-		notifyListener( this );
+		notifyListeners( this );
 	}
 	
 	public String getApiKey()

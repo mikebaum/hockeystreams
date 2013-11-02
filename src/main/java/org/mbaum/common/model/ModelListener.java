@@ -1,4 +1,4 @@
-package org.mbaum.hockeystreams.model;
+package org.mbaum.common.model;
 
 public interface ModelListener<M extends Model<M>>
 {

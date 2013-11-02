@@ -1,4 +1,4 @@
-package org.mbaum.hockeystreams.model;
+package org.mbaum.common.model;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public abstract class AbstractModel<M extends Model<M>> implements Model<M>
         mListeners.clear();
     }
 
-    protected void notifyListener( M model )
+    protected void notifyListeners( M model )
     {
         for( ModelListener<M> listener : Lists.newArrayList( mListeners ) )
             listener.modelChanged( model );

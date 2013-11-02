@@ -1,4 +1,5 @@
-package org.mbaum.hockeystreams.model;
+package org.mbaum.common.model;
+
 
 public final class ModelUtils
 {

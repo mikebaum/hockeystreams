@@ -1,8 +1,7 @@
-package org.mbaum.hockeystreams.net.hockeystreams;
+package org.mbaum.hockeystreams.net;
 
 import java.io.IOException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -44,7 +43,7 @@ public class HockeyStreamsApiClient
         }
     }
 
-    public static void generateIpException( HockeyStreamsModel model ) throws HockeyStreamsApiException
+    public static IpExceptionResponse generateIpException( HockeyStreamsModel model ) throws HockeyStreamsApiException
     {
         String actionPath = IP_EXCEPTION_PATH;
         String entityString = "token=" + model.getToken();
@@ -52,13 +51,15 @@ public class HockeyStreamsApiClient
 
         try
         {
-            IpExceptionResponse ipExceptionResponse = HttpClientUtils.parseResponse( doPost( actionPath, entityString ), 
-                                                                     IpExceptionResponse.class );
-
-            LOGGER.info( actionPath + " request result: " + ipExceptionResponse );
-
-            if ( StringUtils.equals( "Failed", ipExceptionResponse.getStatus() ) )
-                throw new HockeyStreamsApiException( failureMessage );
+        	return HttpClientUtils.parseResponse( doPost( actionPath, entityString ), 
+        										  IpExceptionResponse.class );
+//            IpExceptionResponse ipExceptionResponse = HttpClientUtils.parseResponse( doPost( actionPath, entityString ), 
+//                                                                     IpExceptionResponse.class );
+//
+//            LOGGER.info( actionPath + " request result: " + ipExceptionResponse );
+//
+//            if ( StringUtils.equals( "Failed", ipExceptionResponse.getStatus() ) )
+//                throw new HockeyStreamsApiException( failureMessage );
         }
         catch ( Exception e )
         {
@@ -66,7 +67,7 @@ public class HockeyStreamsApiClient
         }
     }
 
-    public static void getLiveStreams( HockeyStreamsModel model ) throws HockeyStreamsApiException
+    public static GetLiveResponse getLiveStreams( HockeyStreamsModel model ) throws HockeyStreamsApiException
     {
         LOGGER.info( "Executing GET request: " + GET_LIVE_PATH );
         
@@ -87,6 +88,8 @@ public class HockeyStreamsApiClient
             GetLiveResponse getLiveResult = HttpClientUtils.parseResponse( response, GetLiveResponse.class );
             
             LOGGER.info( GET_LIVE_PATH + " parsed result: " + getLiveResult );
+            
+            return getLiveResult;
         }
         catch ( Exception e )
         {
@@ -108,7 +111,7 @@ public class HockeyStreamsApiClient
 
         HttpResponse response = client.execute( request );
         
-        LOGGER.info( "POST request: " + actionPath + " succeeded" );
+        LOGGER.info( "POST request: " + actionPath + " complete" );
         
         return response;
     }

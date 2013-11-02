@@ -5,17 +5,17 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 
-class ExecutableProcessImpl<C extends ProcessContext> implements ExecutableProcess
+class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutableProcess<R>
 {
-    private final Process<C> mProcess;
+    private final Process<C, R> mProcess;
     private final C mContext;
-    private final ProcessListenerSupport mProcessListeners;
+    private final ProcessListenerSupport<R> mProcessListeners;
     
-    private ExecutableProcessImpl( Process<C> process, C context )
+    private ExecutableProcessImpl( Process<C, R> process, C context )
     {
         mProcess = process;
         mContext = context;
-        mProcessListeners = new ProcessListenerSupport();
+        mProcessListeners = new ProcessListenerSupport<R>();
     }
     
     @Override
@@ -25,8 +25,8 @@ class ExecutableProcessImpl<C extends ProcessContext> implements ExecutableProce
         
         try
         {                    
-            mProcess.execute( mContext );
-            mProcessListeners.fireProcessSucceeded();
+            R restult = mProcess.execute( mContext );
+            mProcessListeners.fireProcessSucceeded( restult );
         }
         catch( Exception exception )
         {
@@ -45,32 +45,30 @@ class ExecutableProcessImpl<C extends ProcessContext> implements ExecutableProce
     }
 
     @Override
-    public void addListener( ProcessListener listener )
+    public void addListener( ProcessListener<R> listener )
     {
         mProcessListeners.addListener( listener );
     }
     
     @Override
-    public void removeListener( ProcessListener listener )
+    public void removeListener( ProcessListener<R> listener )
     {
         mProcessListeners.removeListener( listener );
     }
     
-    static <C extends ProcessContext> ExecutableProcess createExecutableProcess( Process<C> process, 
-                                                                                 C context, 
-                                                                                 ProcessListener... listeners )
+    static <C extends ProcessContext, R> ExecutableProcess<R> createExecutableProcess( Process<C, R> process, 
+                                                                                 	   C context, 
+                                                                                 	   ProcessListener<R> listener )
     {
-        ExecutableProcessImpl<C> executableProcess = new ExecutableProcessImpl<C>( process, context );
-        
-        for ( ProcessListener listener : listeners )
-            executableProcess.addListener( listener );
+        ExecutableProcessImpl<C, R> executableProcess = new ExecutableProcessImpl<C, R>( process, context );
+        executableProcess.addListener( listener );
         
         return executableProcess;
     }
     
-    private static class ProcessListenerSupport
+    private static class ProcessListenerSupport<R>
     {
-        private final List<ProcessListener> mListeners = Lists.newArrayList();
+        private final List<ProcessListener<R>> mListeners = Lists.newArrayList();
         private final Invoker mInvoker;
         
         public ProcessListenerSupport()
@@ -78,12 +76,12 @@ class ExecutableProcessImpl<C extends ProcessContext> implements ExecutableProce
             mInvoker = ProcessUtils.getInvoker();
         }
         
-        public void addListener( ProcessListener listener )
+        public void addListener( ProcessListener<R> listener )
         {
             mListeners.add( listener );
         }
         
-        public void removeListener( ProcessListener listener )
+        public void removeListener( ProcessListener<R> listener )
         {
             mListeners.remove( listener );
         }
@@ -95,21 +93,21 @@ class ExecutableProcessImpl<C extends ProcessContext> implements ExecutableProce
                 @Override
                 public void run()
                 {
-                    for( ProcessListener listener : Lists.newArrayList( mListeners ) )
+                    for( ProcessListener<R> listener : Lists.newArrayList( mListeners ) )
                         listener.processStarted();
                 }
             } );
         }
         
-        private void fireProcessSucceeded()
+        private void fireProcessSucceeded( final R result )
         {
             mInvoker.invoke( new Runnable()
             {
                 @Override
                 public void run()
                 {
-                    for( ProcessListener listener : Lists.newArrayList( mListeners ) )
-                        listener.processSucceeded();
+                    for( ProcessListener<R> listener : Lists.newArrayList( mListeners ) )
+                        listener.processSucceeded( result );
                 }
             } );
         }
@@ -121,7 +119,7 @@ class ExecutableProcessImpl<C extends ProcessContext> implements ExecutableProce
                 @Override
                 public void run()
                 {
-                    for( ProcessListener listener : Lists.newArrayList( mListeners ) )
+                    for( ProcessListener<R> listener : Lists.newArrayList( mListeners ) )
                         listener.processFailed( exception );
                 }
             } );
@@ -134,7 +132,7 @@ class ExecutableProcessImpl<C extends ProcessContext> implements ExecutableProce
                 @Override
                 public void run()
                 {
-                    for( ProcessListener listener : Lists.newArrayList( mListeners ) )
+                    for( ProcessListener<R> listener : Lists.newArrayList( mListeners ) )
                         listener.processFinished();
                 }
             } );

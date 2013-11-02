@@ -1,5 +1,6 @@
 package org.mbaum.hockeystreams.net.hockeystreams.transferobject;
 
+
 public class LoginResponse
 {
     private String status;
@@ -8,6 +9,7 @@ public class LoginResponse
     private String favteam;
     private String membership;
     private String token;
+    private String msg;
     
     public String getStatus()
     {
@@ -69,10 +71,22 @@ public class LoginResponse
         this.token = token;
     }
 
-    @Override
-    public String toString()
-    {
-        return "LoginResponse [status=" + status + ", uid=" + uid + ", username=" + username +
-               ", favteam=" + favteam + ", membership=" + membership + ", token=" + token + "]";
-    }
+    public String getMsg()
+	{
+		return msg;
+	}
+
+	public void setMsg( String msg )
+	{
+		this.msg = msg;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "LoginResponse [status=" + status + ", uid=" + uid
+				+ ", username=" + username + ", favteam=" + favteam
+				+ ", membership=" + membership + ", token=" + token + ", msg="
+				+ msg + "]";
+	}
 }

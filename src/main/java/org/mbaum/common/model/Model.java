@@ -1,6 +1,6 @@
-package org.mbaum.hockeystreams.model;
+package org.mbaum.common.model;
 
-import org.mbaum.hockeystreams.Destroyable;
+import org.mbaum.common.Destroyable;
 
 public interface Model<M extends Model<M>> extends Destroyable
 {

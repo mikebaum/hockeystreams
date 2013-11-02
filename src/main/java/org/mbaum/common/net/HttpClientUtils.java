@@ -8,7 +8,7 @@ import org.apache.http.HttpResponse;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.mbaum.hockeystreams.net.hockeystreams.HockeyStreamsApiClient;
+import org.mbaum.hockeystreams.net.HockeyStreamsApiClient;
 
 public class HttpClientUtils
 {

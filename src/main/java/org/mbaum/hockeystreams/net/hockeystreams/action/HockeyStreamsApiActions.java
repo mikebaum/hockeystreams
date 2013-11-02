@@ -1,8 +1,8 @@
 package org.mbaum.hockeystreams.net.hockeystreams.action;
 
-import static org.mbaum.hockeystreams.net.hockeystreams.HockeyStreamsApiClient.generateIpException;
-import static org.mbaum.hockeystreams.net.hockeystreams.HockeyStreamsApiClient.getLiveStreams;
-import static org.mbaum.hockeystreams.net.hockeystreams.HockeyStreamsApiClient.login;
+import static org.mbaum.hockeystreams.net.HockeyStreamsApiClient.generateIpException;
+import static org.mbaum.hockeystreams.net.HockeyStreamsApiClient.getLiveStreams;
+import static org.mbaum.hockeystreams.net.HockeyStreamsApiClient.login;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mbaum.common.execution.AbstractProcess;
@@ -10,12 +10,15 @@ import org.mbaum.common.execution.Process;
 import org.mbaum.common.execution.ProcessContext;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
 import org.mbaum.hockeystreams.model.LoginPanelModel;
+import org.mbaum.hockeystreams.net.hockeystreams.transferobject.GetLiveResponse;
+import org.mbaum.hockeystreams.net.hockeystreams.transferobject.IpExceptionResponse;
+import org.mbaum.hockeystreams.net.hockeystreams.transferobject.LoginResponse;
 
 public class HockeyStreamsApiActions
 {
-    public static final Process<LoginContext> LOGIN_ACTION = createLoginProcess();
-    public static final Process<IpExectionsContext> GENERATE_IP_EXCEPTION_ACTION = createIpExceptionProcess();
-    public static final Process<GetLiveStreamsContext> GET_LIVE_STREAMS_ACTION = createGetLiveStreamsProcess();
+    public static final Process<LoginContext, LoginResponse> LOGIN_ACTION = createLoginProcess();
+    public static final Process<IpExectionsContext, IpExceptionResponse> GENERATE_IP_EXCEPTION_ACTION = createIpExceptionProcess();
+    public static final Process<GetLiveStreamsContext, GetLiveResponse> GET_LIVE_STREAMS_ACTION = createGetLiveStreamsProcess();
     
     
     public static interface IpExectionsContext extends ProcessContext
@@ -34,14 +37,14 @@ public class HockeyStreamsApiActions
         LoginPanelModel getLoginPanelModel();
     }
     
-    private static Process<IpExectionsContext> createIpExceptionProcess()
+    private static Process<IpExectionsContext, IpExceptionResponse> createIpExceptionProcess()
     {
-        return new AbstractProcess<IpExectionsContext>( "generate ip exception" )
+        return new AbstractProcess<IpExectionsContext, IpExceptionResponse>( "generate ip exception" )
         {
             @Override
-            public void execute( IpExectionsContext context ) throws Exception
+            public IpExceptionResponse execute( IpExectionsContext context ) throws Exception
             {
-                generateIpException( context.getModel() );
+                return generateIpException( context.getModel() );
             }
             
             @Override
@@ -52,14 +55,14 @@ public class HockeyStreamsApiActions
         };
     }
 
-    private static Process<GetLiveStreamsContext> createGetLiveStreamsProcess()
+    private static Process<GetLiveStreamsContext, GetLiveResponse> createGetLiveStreamsProcess()
     {
-        return new AbstractProcess<GetLiveStreamsContext>( "get live streams" )
+        return new AbstractProcess<GetLiveStreamsContext, GetLiveResponse>( "get live streams" )
         {
             @Override
-            public void execute( GetLiveStreamsContext context ) throws Exception
+            public GetLiveResponse execute( GetLiveStreamsContext context ) throws Exception
             {
-                getLiveStreams( context.getModel() );
+                return getLiveStreams( context.getModel() );
             }
             
             @Override
@@ -70,17 +73,17 @@ public class HockeyStreamsApiActions
         };
     }
 
-    private static Process<LoginContext> createLoginProcess()
+    private static Process<LoginContext, LoginResponse> createLoginProcess()
     {
-    	return new AbstractProcess<LoginContext>( "login" )
+    	return new AbstractProcess<LoginContext, LoginResponse>( "login" )
         {
             @Override
-            public void execute( LoginContext context ) throws Exception
+            public LoginResponse execute( LoginContext context ) throws Exception
             {
-                LoginPanelModel loginPanelModel = context.getLoginPanelModel();
-                context.getHockeyStreamsModel().setSessionToken( login( loginPanelModel.getUsername(),
-                                                                        loginPanelModel.getPassword(),
-                                                                        loginPanelModel.getApiKey() ).getToken() );
+            	LoginPanelModel loginPanelModel = context.getLoginPanelModel();
+            	return login( loginPanelModel.getUsername(),
+            				  loginPanelModel.getPassword(),
+            				  loginPanelModel.getApiKey() );
             }
             
             @Override

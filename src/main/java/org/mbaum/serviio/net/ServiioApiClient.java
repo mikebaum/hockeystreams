@@ -22,7 +22,7 @@ public class ServiioApiClient
         
         HttpClient client = HttpClients.createDefault();
 
-        HttpGet request = new HttpGet( "http://10.0.4.103:23423/rest/ping" );
+        HttpGet request = new HttpGet( "http://localhost:23423/rest/ping" );
         request.setHeader( "Accept", "application/json" );
 
         HttpResponse response = client.execute( request );
@@ -41,7 +41,7 @@ public class ServiioApiClient
         
         HttpClient client = HttpClients.createDefault();
 
-        HttpGet request = new HttpGet( "http://10.0.4.103:23423/rest/repository" );
+        HttpGet request = new HttpGet( "http://localhost:23423/rest/repository" );
         request.setHeader( "Accept", "application/json" );
 
         HttpResponse response = client.execute( request );

@@ -1,6 +1,7 @@
 package org.mbaum.hockeystreams.model;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.mbaum.common.model.AbstractModel;
 
 public class HockeyStreamsModel extends AbstractModel<HockeyStreamsModel>
 {
@@ -12,7 +13,7 @@ public class HockeyStreamsModel extends AbstractModel<HockeyStreamsModel>
             return;
         
         mToken = token;
-        notifyListener( this );
+        notifyListeners( this );
     }
     
     public String getToken()

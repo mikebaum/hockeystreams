@@ -1,11 +1,11 @@
 package org.mbaum.common.execution;
 
-public class ProcessListenerWrapper implements ProcessListener
+public class ProcessListenerWrapper<R> implements ProcessListener<R>
 {
     private final Invoker mInvoker;
-    private ProcessListener mListener;
+    private ProcessListener<R> mListener;
     
-    public ProcessListenerWrapper( Invoker invoker, ProcessListener listener )
+    public ProcessListenerWrapper( Invoker invoker, ProcessListener<R> listener )
     {
         mInvoker = invoker;
         mListener = listener;
@@ -25,14 +25,14 @@ public class ProcessListenerWrapper implements ProcessListener
     }
 
     @Override
-    public void processSucceeded()
+    public void processSucceeded( final R result )
     {
         mInvoker.invoke( new Runnable()
         {
             @Override
             public void run()
             {
-                mListener.processSucceeded();
+                mListener.processSucceeded( result );
             }
         } );
     }

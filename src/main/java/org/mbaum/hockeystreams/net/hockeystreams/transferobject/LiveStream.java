@@ -1,8 +1,9 @@
 package org.mbaum.hockeystreams.net.hockeystreams.transferobject;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+//@JsonIgnoreProperties(ignoreUnknown = true)
 public class LiveStream
 {
     private String id;
@@ -179,6 +180,8 @@ public class LiveStream
     {
         this.sdUrl = sdUrl;
     }
+    
+    @JsonProperty("TrueLiveSD")
     public String getTrueLiveSD()
     {
         return TrueLiveSD;
@@ -187,6 +190,8 @@ public class LiveStream
     {
         TrueLiveSD = trueLiveSD;
     }
+    
+    @JsonProperty("TrueLiveHD")
     public String getTrueLiveHD()
     {
         return TrueLiveHD;

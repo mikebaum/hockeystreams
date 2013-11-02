@@ -2,23 +2,23 @@ package org.mbaum.common.execution;
 
 import org.apache.log4j.Logger;
 
-public interface ProcessListener
+public interface ProcessListener<R>
 {
     void processStarted();
     
-    void processSucceeded();
+    void processSucceeded( R result );
     
     void processFailed( Exception exception );
     
     void processFinished();
     
-    public static class ProcessListenerAdapter implements ProcessListener
+    public static class ProcessListenerAdapter<R> implements ProcessListener<R>
     {
         @Override
         public void processStarted() {}
 
         @Override
-        public void processSucceeded() {}
+        public void processSucceeded( R result ) {}
 
         @Override
         public void processFailed( Exception exception ) {}
@@ -27,7 +27,7 @@ public interface ProcessListener
         public void processFinished() {}
     }
     
-    public static class LoggingProcessListener implements ProcessListener
+    public static class LoggingProcessListener<R> implements ProcessListener<R>
     {
         private final Logger mLogger;
         private final String mDescription;
@@ -45,7 +45,7 @@ public interface ProcessListener
         }
         
         @Override
-        public void processSucceeded()
+        public void processSucceeded( R result )
         {
             mLogger.info( "Process [" + mDescription + "] succeeded" );
         }

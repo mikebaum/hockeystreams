@@ -1,7 +1,7 @@
 package org.mbaum.common.execution;
 
 
-public abstract class AbstractProcess<C extends ProcessContext> implements Process<C>
+public abstract class AbstractProcess<C extends ProcessContext, R> implements Process<C, R>
 {
     private final String mDescription;
     
