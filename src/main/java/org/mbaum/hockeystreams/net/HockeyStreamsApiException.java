@@ -1,5 +1,6 @@
 package org.mbaum.hockeystreams.net;
 
+@SuppressWarnings("serial")
 public class HockeyStreamsApiException extends Exception
 {
     public HockeyStreamsApiException()
