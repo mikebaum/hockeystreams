@@ -25,16 +25,16 @@ import org.mbaum.common.execution.ProcessListener.ProcessListenerAdapter;
 import org.mbaum.common.execution.ResultHandler;
 import org.mbaum.common.model.ModelListener;
 import org.mbaum.common.model.ProgressPanelModel;
+import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.ProgressPanel;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
 import org.mbaum.hockeystreams.model.LoginPanelModel;
 import org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.GetLiveStreamsContext;
 import org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.IpExectionsContext;
 import org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.LoginContext;
-import org.mbaum.hockeystreams.net.hockeystreams.transferobject.GetLiveResponse;
-import org.mbaum.hockeystreams.net.hockeystreams.transferobject.IpExceptionResponse;
-import org.mbaum.hockeystreams.net.hockeystreams.transferobject.LoginResponse;
-import org.mbaum.hockeystreams.view.HockeyStreamsActionPanel;
+import org.mbaum.hockeystreams.net.transferobject.GetLiveResponse;
+import org.mbaum.hockeystreams.net.transferobject.IpExceptionResponse;
+import org.mbaum.hockeystreams.net.transferobject.LoginResponse;
 import org.mbaum.hockeystreams.view.LoginPanel;
 
 class HockeyStreamsComponent
@@ -46,7 +46,7 @@ class HockeyStreamsComponent
     private final ExecutableProcess<IpExceptionResponse> mIpExceptionAction;
     private final ExecutableProcess<GetLiveResponse> mGetLiveStreamsAction;
     private final ProcessExecutorService mHockeyStreamsExecutor;
-	private ProgressPanelModel mProgressPanelModel;
+	private final ProgressPanelModel mProgressPanelModel;
 	
 	public HockeyStreamsComponent( JFrame parent )
 	{
@@ -266,9 +266,7 @@ class HockeyStreamsComponent
 		JPanel panel = new JPanel( new BorderLayout() );
 		
 		panel.add( new LoginPanel( loginPanelModel, loginAction ).getCompnent(), BorderLayout.NORTH );
-		panel.add( new HockeyStreamsActionPanel( ipExceptionAction, 
-		                                         getLiveStreamsAction, 
-		                                         hockeyStreamsModel ).getComponent(), 
+		panel.add( new ActionPanel( ipExceptionAction, getLiveStreamsAction ).getComponent(), 
 		           BorderLayout.CENTER );
 		panel.add( new ProgressPanel( progressPanelModel ).getComponent(), BorderLayout.SOUTH );
 		

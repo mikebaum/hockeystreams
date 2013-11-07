@@ -11,20 +11,19 @@ import org.apache.http.message.BasicNameValuePair;
 import org.mbaum.common.execution.Process;
 import org.mbaum.common.execution.ProcessContext;
 import org.mbaum.common.net.HttpProcess;
-import org.mbaum.common.net.parse.Parsers;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
 import org.mbaum.hockeystreams.model.LoginPanelModel;
-import org.mbaum.hockeystreams.net.hockeystreams.transferobject.GetLiveResponse;
-import org.mbaum.hockeystreams.net.hockeystreams.transferobject.IpExceptionResponse;
-import org.mbaum.hockeystreams.net.hockeystreams.transferobject.LoginResponse;
+import org.mbaum.hockeystreams.net.transferobject.GetLiveResponse;
+import org.mbaum.hockeystreams.net.transferobject.IpExceptionResponse;
+import org.mbaum.hockeystreams.net.transferobject.LoginResponse;
 
 public class HockeyStreamsApiProcesses
 {
-	private static final String LOGIN_PATH = "/Login";
-	private static final String GET_LIVE_PATH = "/GetLive";
-	private static final String IP_EXCEPTION_PATH = "/IPException";
-
 	private static final String HOCKEYSTREAMS_API_URL = "https://api.hockeystreams.com";
+
+	private static final String LOGIN_PATH        = "/Login";
+	private static final String GET_LIVE_PATH     = "/GetLive";
+	private static final String IP_EXCEPTION_PATH = "/IPException";
 	
     public static final Process<LoginContext, LoginResponse> 			 LOGIN_PROCESS           = createLoginProcess();
     public static final Process<IpExectionsContext, IpExceptionResponse> IP_EXCEPTION_PROCESS    = createIpExceptionProcess();

@@ -2,11 +2,12 @@ package org.mbaum.hockeystreams;
 
 import java.awt.Dimension;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
+import org.mbaum.serviio.ServiioComponent;
 
 public class ServiioHockeyStreamsConsole
 {
@@ -15,27 +16,41 @@ public class ServiioHockeyStreamsConsole
 
 	private final JFrame mFrame;
 	private final HockeyStreamsComponent mHockeyStremsComponent;
+	private final JTabbedPane mConsoleTabbedPane;
+	private final ServiioComponent mServiioComponent;
 
     public ServiioHockeyStreamsConsole()
 	{
     	mFrame = new JFrame( "Serviio HockeyStreams Console" );
+    	mConsoleTabbedPane = new JTabbedPane();
         mHockeyStremsComponent = new HockeyStreamsComponent( mFrame );
-        buildAndShowConsole( mFrame, mHockeyStremsComponent);
+        mServiioComponent = new ServiioComponent( mFrame );
+        
+        buildAndShowConsole( mFrame, mConsoleTabbedPane, mHockeyStremsComponent, mServiioComponent );
 	}
     
-	private static void buildAndShowConsole( JFrame frame, HockeyStreamsComponent hockeyStreamsComponent )
+	private static void buildAndShowConsole( JFrame frame, 
+											 JTabbedPane consoleTabbedPane, 
+											 HockeyStreamsComponent hockeyStreamsComponent, 
+											 ServiioComponent serviioComponent )
     {
-	    initGui( frame, hockeyStreamsComponent );
+	    initGui( frame, consoleTabbedPane, hockeyStreamsComponent, serviioComponent );
 	    frame.pack();
 	    frame.setVisible( true );
     }
 
-	private static void initGui( JFrame frame, HockeyStreamsComponent hockeyStreamsComponent )
+	private static void initGui( JFrame frame, 
+							     JTabbedPane consoleTabbedPane, 
+							     HockeyStreamsComponent hockeyStreamsComponent, 
+							     ServiioComponent serviioComponent )
 	{
 	    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-	    JComponent hockeyStreamsPanel = hockeyStreamsComponent.getComponent();
-	    frame.setContentPane( hockeyStreamsPanel );
-	    frame.setMinimumSize( new Dimension( hockeyStreamsPanel.getPreferredSize().width,
+	    
+	    consoleTabbedPane.addTab( "HockeyStreams", hockeyStreamsComponent.getComponent() );
+	    consoleTabbedPane.addTab( "Serviio", serviioComponent.getComponent() );
+	    
+	    frame.setContentPane( consoleTabbedPane );
+	    frame.setMinimumSize( new Dimension( hockeyStreamsComponent.getComponent().getPreferredSize().width,
 	                                         CONSOLE_MIN_HEIGHT ) );
 	}
 	

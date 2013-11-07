@@ -1,4 +1,4 @@
-package org.mbaum.hockeystreams.view;
+package org.mbaum.common.view;
 
 import java.awt.BorderLayout;
 
@@ -8,17 +8,13 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.mbaum.hockeystreams.model.HockeyStreamsModel;
-
-public class HockeyStreamsActionPanel
+public class ActionPanel
 {
     private final JComponent mActionToolBar;
     
-    public HockeyStreamsActionPanel( Action ipExceptionAction, 
-                                     Action getLiveStreamsAction, 
-                                     HockeyStreamsModel model )
+    public ActionPanel( Action... actions )
     {
-        mActionToolBar = buildActionPanel( ipExceptionAction, getLiveStreamsAction, model );
+        mActionToolBar = buildActionPanel( actions );
     }
     
     public JComponent getComponent()
@@ -26,9 +22,7 @@ public class HockeyStreamsActionPanel
         return mActionToolBar;
     }
 
-    private static JComponent buildActionPanel( Action ipExceptionAction,
-                                                Action getLiveStreamsAction,
-                                                HockeyStreamsModel model )
+    private static JComponent buildActionPanel( Action... actions )
     {
         JPanel panel = new JPanel( new BorderLayout() );
         panel.setBorder( BorderFactory.createTitledBorder( "HockeyStreams Actions" ) );
@@ -36,8 +30,8 @@ public class HockeyStreamsActionPanel
         JPanel buttonPanel = new JPanel( new BorderLayout() );
         JPanel buttons = new JPanel();
         
-        buttons.add( new JButton( ipExceptionAction ) );
-        buttons.add( new JButton( getLiveStreamsAction ) );
+        for ( Action action : actions )
+        	buttons.add( new JButton( action ) );
         
         buttonPanel.add( buttons, BorderLayout.NORTH );
         

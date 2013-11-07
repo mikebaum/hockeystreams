@@ -1,4 +1,4 @@
-package org.mbaum.hockeystreams.net.hockeystreams.transferobject;
+package org.mbaum.hockeystreams.net.transferobject;
 
 public class IpExceptionResponse
 {
