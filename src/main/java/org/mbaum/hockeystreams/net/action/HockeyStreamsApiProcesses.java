@@ -10,6 +10,7 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.mbaum.common.execution.Process;
 import org.mbaum.common.execution.ProcessContext;
+import org.mbaum.common.model.ModelValidator;
 import org.mbaum.common.net.HttpProcess;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
 import org.mbaum.hockeystreams.model.LoginPanelModel;
@@ -24,6 +25,10 @@ public class HockeyStreamsApiProcesses
 	private static final String LOGIN_PATH        = "/Login";
 	private static final String GET_LIVE_PATH     = "/GetLive";
 	private static final String IP_EXCEPTION_PATH = "/IPException";
+
+	public static final ModelValidator<LoginPanelModel>    LOGIN_VALIDATOR        = createLoginValidator();
+	public static final ModelValidator<HockeyStreamsModel> IP_EXCEPTION_VALIDATOR = createTokenValidator();
+	public static final ModelValidator<HockeyStreamsModel> GET_LIVE_VALIDATOR     = createTokenValidator();
 	
     public static final Process<LoginContext, LoginResponse> 			 LOGIN_PROCESS           = createLoginProcess();
     public static final Process<IpExectionsContext, IpExceptionResponse> IP_EXCEPTION_PROCESS    = createIpExceptionProcess();
@@ -50,19 +55,13 @@ public class HockeyStreamsApiProcesses
         return new HttpProcess<IpExectionsContext, IpExceptionResponse>( newJsonParser( IpExceptionResponse.class ), 
         		                      									 "generate ip exception" )
         {
-            @Override
-            public boolean canExecuteWith( IpExectionsContext context )
-            {
-                return ! StringUtils.isBlank( context.getModel().getToken() );
-            }
-
 			@Override
 			protected HttpUriRequest buildRequest( IpExectionsContext context )
 			{
 				HttpEntity entity = 
 				        EntityBuilder.create()
-									  .setParameters( new BasicNameValuePair( "token", context.getModel().getToken() ) )
-									  .build();
+				                     .setParameters( new BasicNameValuePair( "token", context.getModel().getToken() ) )
+				                     .build();
 				
 				return RequestBuilder.post().setUri( HOCKEYSTREAMS_API_URL + IP_EXCEPTION_PATH )
 		                   				    .setEntity( entity )
@@ -76,12 +75,6 @@ public class HockeyStreamsApiProcesses
     {
         return new HttpProcess<GetLiveStreamsContext, GetLiveResponse>( newJsonParser( GetLiveResponse.class ), "get live streams" )
         {
-            @Override
-            public boolean canExecuteWith( GetLiveStreamsContext context )
-            {
-                return ! StringUtils.isBlank( context.getModel().getToken() );
-            }
-
 			@Override
 			protected HttpUriRequest buildRequest( GetLiveStreamsContext context )
 			{
@@ -93,24 +86,10 @@ public class HockeyStreamsApiProcesses
         };
     }
 
-    private static Process<LoginContext, LoginResponse> createLoginProcess()
+    private static Process<LoginContext, LoginResponse> createLoginProcess( )
     {
     	return new HttpProcess<LoginContext, LoginResponse>( newJsonParser( LoginResponse.class ), "login" )
         {
-            @Override
-            public boolean canExecuteWith( LoginContext context )
-            {
-                LoginPanelModel loginPanelModel = context.getLoginPanelModel();
-                
-                if ( StringUtils.isBlank( loginPanelModel.getUsername() ) )
-                    return false;
-                
-                if ( StringUtils.isBlank( loginPanelModel.getPassword() ) )
-                    return false;
-                
-                return ! StringUtils.isBlank( loginPanelModel.getApiKey() );
-            }
-
 			@Override
 			protected HttpUriRequest buildRequest( LoginContext context )
 			{
@@ -129,6 +108,36 @@ public class HockeyStreamsApiProcesses
 						             .addHeader( "content-type", "application/x-www-form-urlencoded" )
 						             .build();
 			}
+        };
+    }
+
+    private static ModelValidator<HockeyStreamsModel> createTokenValidator()
+    {
+        return new ModelValidator<HockeyStreamsModel>()
+        {
+            @Override
+            public boolean isValid( HockeyStreamsModel model )
+            {
+                return ! StringUtils.isBlank( model.getToken() );
+            }
+        };
+    }
+
+    private static ModelValidator<LoginPanelModel> createLoginValidator()
+    {
+        return new ModelValidator<LoginPanelModel>()
+        {
+            @Override
+            public boolean isValid( LoginPanelModel model )
+            {
+                if ( StringUtils.isBlank( model.getUsername() ) )
+                    return false;
+                
+                if ( StringUtils.isBlank( model.getPassword() ) )
+                    return false;
+                
+                return ! StringUtils.isBlank( model.getApiKey() );
+            }
         };
     }
 }

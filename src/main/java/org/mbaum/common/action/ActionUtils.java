@@ -10,14 +10,17 @@ import javax.swing.Action;
 import javax.swing.Icon;
 
 import org.mbaum.common.execution.ExecutableProcess;
+import org.mbaum.common.veto.Vetoer;
 
 public final class ActionUtils
 {
     private ActionUtils(){}
     
-    public static ActionExecutable buildActionExecutable( ExecutableProcess<?> executableProcess, Executor executor )
+    public static ActionExecutable buildActionExecutable( ExecutableProcess<?> executableProcess, 
+                                                          ActionModel actionModel, 
+                                                          Executor executor )
     {
-        return createActionExecutable( executableProcess, executor );
+        return createActionExecutable( executableProcess, actionModel, executor );
     }
 
     @SuppressWarnings("serial")
@@ -34,6 +37,7 @@ public final class ActionUtils
             }
         };
         
+        action.setEnabled( executable.isEnabled() );
         executable.setListener( createActionExecutableListener( action, executable ) );
         
         return action;
@@ -47,6 +51,16 @@ public final class ActionUtils
     public static Action createAction( ActionExecutable executable, Icon icon )
     {
         return createAction( executable, null, icon );
+    }
+    
+    public static ActionModel createActionModel( Vetoer... vetoers )
+    {
+        ActionModel actionModel = new ActionModelImpl();
+        
+        for ( Vetoer vetoer : vetoers )
+            actionModel.addVetoer( vetoer );
+        
+        return actionModel;
     }
 
     private static ActionExecutableListener createActionExecutableListener( final AbstractAction action,

@@ -2,6 +2,7 @@ package org.mbaum.serviio;
 
 import static org.mbaum.common.action.ActionUtils.buildActionExecutable;
 import static org.mbaum.common.execution.ProgressPanelExecutor.createProgressPanelExecutor;
+import static org.mbaum.common.veto.Vetoers.createVetoer;
 import static org.mbaum.serviio.net.ServiioApiActions.PING_PROCESS;
 
 import java.awt.BorderLayout;
@@ -14,17 +15,19 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.mbaum.common.action.ActionBuilder;
-import org.mbaum.common.action.ActionEnabler;
+import org.mbaum.common.action.ActionExecutable;
+import org.mbaum.common.action.ActionUtils;
 import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessExecutorService;
 import org.mbaum.common.execution.ProcessListener;
-import org.mbaum.common.model.ModelListener;
+import org.mbaum.common.model.ModelValidator;
 import org.mbaum.common.model.ProgressPanelModel;
+import org.mbaum.common.veto.Vetoer;
 import org.mbaum.common.view.ActionPanel;
 import org.mbaum.serviio.model.ServiioModel;
 import org.mbaum.serviio.net.ServiioApiActions.PingContext;
 import org.mbaum.serviio.net.transferobject.PingResponse;
+import org.mbaum.serviio.view.ServiioPanel;
 
 public class ServiioComponent
 {
@@ -34,6 +37,7 @@ public class ServiioComponent
 	private final ExecutableProcess<PingResponse> mPingAction;
 	private final ProgressPanelModel mProgressPanelModel;
 	private final ProcessExecutorService mServiioProcessExecutor;
+    private ActionExecutable mPingActionExecutable;
 
 	public ServiioComponent( JFrame frame )
 	{
@@ -43,12 +47,14 @@ public class ServiioComponent
 		mServiioProcessExecutor = createProgressPanelExecutor( mProgressPanelModel );
 
 		mPingAction = mServiioProcessExecutor.buildExecutableProcess( PING_PROCESS, 
-				createPingContext( mServiioModel ), 
-				createPigProcessListener() );
+		                                                              createPingContext( mServiioModel ), 
+		                                                              createPigProcessListener() );
 
-
-
-		mComponent = buildGui( mServiioModel, createPingAction( mPingAction, mServiioModel, mServiioProcessExecutor ) );
+		mPingActionExecutable = createPingActionExecutable( mPingAction, 
+		                                                    mServiioProcessExecutor, 
+		                                                    createVetoer( mServiioModel, 
+		                                                                  createPingValidator() ) );
+        mComponent = buildGui( mServiioModel, mPingActionExecutable );
 	}
 
 	public JComponent getComponent()
@@ -80,9 +86,11 @@ public class ServiioComponent
 		};
 	}
 
-	private static JComponent buildGui( ServiioModel serviioModel, Action pingAction )
+	private static JComponent buildGui( ServiioModel serviioModel, ActionExecutable pingActionExecutable )
 	{
 		JPanel serviioPanel = new JPanel( new BorderLayout() );
+		
+		Action pingAction = ActionUtils.createAction( pingActionExecutable, "Ping" );
 
 		serviioPanel.add( new ServiioPanel( serviioModel ).getComponent(), BorderLayout.NORTH );
 		serviioPanel.add( new ActionPanel( pingAction ).getComponent(), BorderLayout.CENTER );
@@ -90,44 +98,28 @@ public class ServiioComponent
 		return serviioPanel;
 	}
 
-	private static Action createPingAction( ExecutableProcess<PingResponse> pingExecutable,
-											ServiioModel model,
-											Executor executor )
+	private static ActionExecutable createPingActionExecutable( ExecutableProcess<PingResponse> pingExecutable,
+	                                                            Executor executor,
+	                                                            Vetoer vetoer )
 	{
-		final ActionEnabler<ServiioModel> actionEnabler = createPingActionEnabler();
-		final Action action = ActionBuilder.Builder( buildActionExecutable( pingExecutable, 
-																			executor ) )
-										   .setButtonText( "Ping" )
-										   .setInitiallyEnabled( actionEnabler.isEnabled( model ) )
-										   .build();
-
-		model.addListener( new ModelListener<ServiioModel>()
-		{
-			@Override
-			public void modelChanged( ServiioModel model )
-			{
-				action.setEnabled( actionEnabler.isEnabled( model ) );
-			}
-		} );
-
-		return action;
+		return buildActionExecutable( pingExecutable, ActionUtils.createActionModel( vetoer ), executor );
 	}
 	
-	private static ActionEnabler<ServiioModel> createPingActionEnabler()
+	private static ModelValidator<ServiioModel> createPingValidator()
 	{
-		return new ActionEnabler<ServiioModel>()
-		{
-			@Override
-			public boolean isEnabled( ServiioModel model )
-			{
-				if ( StringUtils.isBlank( model.getHostName() ) )
-					return false;
-				
-				if ( StringUtils.isBlank( model.getPort() ) )
-					return false;
-				
-				return NumberUtils.isNumber( model.getPort() );
-			}
-		};
+		return new ModelValidator<ServiioModel>()
+        {
+            @Override
+            public boolean isValid( ServiioModel model )
+            {
+                if ( StringUtils.isBlank( model.getHostName() ) )
+                    return false;
+                
+                if ( StringUtils.isBlank( model.getPort() ) )
+                    return false;
+                
+                return NumberUtils.isNumber( model.getPort() );
+            }
+        };
 	}
 }

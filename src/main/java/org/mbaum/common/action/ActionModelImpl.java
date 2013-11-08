@@ -1,6 +1,7 @@
 package org.mbaum.common.action;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.mbaum.common.model.AbstractModel;
 import org.mbaum.common.veto.VetoListener;
@@ -12,6 +13,8 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 {
 	private final List<Vetoer> mVetoers = Lists.newArrayList();
 	
+	private final AtomicBoolean mEnabled = new AtomicBoolean();
+	
 	@Override
 	public void destroy()
 	{
@@ -22,17 +25,31 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 	@Override
 	public boolean isEnabled()
 	{
-		for ( Vetoer vetoer : mVetoers )
-			if ( vetoer.isVetoing() )
-				return false;
-		
-		return true;
+	    return mEnabled.get();
 	}
 	
 	@Override
 	public void addVetoer( Vetoer vetoer )
 	{
+	    mVetoers.add( vetoer );
 		vetoer.setListener( createVetoerListener() );
+		updateEnabled();
+	}
+	
+	private void updateEnabled()
+	{
+	    boolean isEnabled = true;
+	    for ( Vetoer vetoer : mVetoers )
+	    {
+	        if ( vetoer.isVetoing() )
+	        {	            
+	            isEnabled = false;
+	            break;
+	        }
+	    }
+	    
+	    if ( mEnabled.compareAndSet( ! isEnabled, isEnabled ) )
+	        notifyListeners( this );
 	}
 
 	private VetoListener createVetoerListener()
@@ -42,7 +59,7 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 			@Override
 			public void vetoChanged()
 			{
-				notifyListeners( ActionModelImpl.this );
+				updateEnabled();
 			}
 		};
 	}

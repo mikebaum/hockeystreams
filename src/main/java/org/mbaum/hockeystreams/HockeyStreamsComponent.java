@@ -1,10 +1,16 @@
 package org.mbaum.hockeystreams;
 
 import static org.mbaum.common.action.ActionUtils.buildActionExecutable;
+import static org.mbaum.common.action.ActionUtils.createAction;
+import static org.mbaum.common.action.ActionUtils.createActionModel;
 import static org.mbaum.common.execution.ProgressPanelExecutor.createProgressPanelExecutor;
+import static org.mbaum.common.veto.Vetoers.createVetoer;
 import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.GET_LIVE_STREAMS_ACTION;
+import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.GET_LIVE_VALIDATOR;
 import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.IP_EXCEPTION_PROCESS;
+import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.IP_EXCEPTION_VALIDATOR;
 import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.LOGIN_PROCESS;
+import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.LOGIN_VALIDATOR;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -17,14 +23,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
-import org.mbaum.common.action.ActionBuilder;
+import org.mbaum.common.action.ActionExecutable;
 import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessExecutorService;
 import org.mbaum.common.execution.ProcessListener;
 import org.mbaum.common.execution.ProcessListener.ProcessListenerAdapter;
 import org.mbaum.common.execution.ResultHandler;
-import org.mbaum.common.model.ModelListener;
 import org.mbaum.common.model.ProgressPanelModel;
+import org.mbaum.common.veto.Vetoer;
 import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.ProgressPanel;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
@@ -41,10 +47,13 @@ class HockeyStreamsComponent
 {
 	private final LoginPanelModel mLoginPanelModel;
     private final HockeyStreamsModel mHockeyStreamsModel;
-    private final ExecutableProcess<LoginResponse> mLoginAction;
     private final JComponent mPanel;
-    private final ExecutableProcess<IpExceptionResponse> mIpExceptionAction;
-    private final ExecutableProcess<GetLiveResponse> mGetLiveStreamsAction;
+    private final ExecutableProcess<LoginResponse> mLoginProcess;
+    private final ExecutableProcess<IpExceptionResponse> mIpExceptionProcess;
+    private final ExecutableProcess<GetLiveResponse> mGetLiveStreamsProcess;
+    private final ActionExecutable mLoginActionExecutable;
+    private final ActionExecutable mIpExceptionActionExecutable;
+    private final ActionExecutable mGetLiveStreamsActionExecutable;
     private final ProcessExecutorService mHockeyStreamsExecutor;
 	private final ProgressPanelModel mProgressPanelModel;
 	
@@ -55,32 +64,39 @@ class HockeyStreamsComponent
 		mProgressPanelModel = new ProgressPanelModel();
 		mHockeyStreamsExecutor = createProgressPanelExecutor( mProgressPanelModel );
 		
-        mLoginAction = 
+        mLoginProcess = 
         		mHockeyStreamsExecutor.buildExecutableProcess( LOGIN_PROCESS,
                                      						   createLoginContext( mLoginPanelModel ),
                                      				           createLoginListener( mHockeyStreamsModel, parent ),
-                                     				           HockeyStreamsComponent.createLoginResultHandler( mProgressPanelModel ) );
-        mIpExceptionAction = 
+                                     				           createLoginResultHandler( mProgressPanelModel ) );
+        mIpExceptionProcess = 
         		mHockeyStreamsExecutor.buildExecutableProcess( IP_EXCEPTION_PROCESS, 
                                      						   createIpExceptionContext( mHockeyStreamsModel ),
                                      						   createIpExceptionListener() );
-        mGetLiveStreamsAction = 
+        mGetLiveStreamsProcess = 
         		mHockeyStreamsExecutor.buildExecutableProcess( GET_LIVE_STREAMS_ACTION, 
                                      						   createGetLiveContext( mHockeyStreamsModel ),
                                      						   createGetLiveListener() );
         
-		mPanel = buildGui( mLoginPanelModel, 
+		mLoginActionExecutable = createLoginActionExecutable( mLoginProcess,
+		                                                      mHockeyStreamsExecutor,
+		                                                      createVetoer( mLoginPanelModel, 
+		                                                                    LOGIN_VALIDATOR ) );
+		
+        mIpExceptionActionExecutable = createIpExceptionActionExecutable( mIpExceptionProcess, 
+                                                                          mHockeyStreamsExecutor,
+                                                                          createVetoer( mHockeyStreamsModel, 
+                                                                                        IP_EXCEPTION_VALIDATOR ) );
+        mGetLiveStreamsActionExecutable = createGetLiveStreamsActionExecutable( mGetLiveStreamsProcess, 
+                                                                                mHockeyStreamsExecutor,
+                                                                                createVetoer( mHockeyStreamsModel, 
+                                                                                              GET_LIVE_VALIDATOR ) );
+        mPanel = buildGui( mLoginPanelModel, 
 		                   mHockeyStreamsModel, 
 		                   mProgressPanelModel,
-		                   createLoginAction( mLoginAction, 
-		                                      mLoginPanelModel, 
-		                                      mHockeyStreamsExecutor ), 
-		                   HockeyStreamsComponent.createIpExceptionAction( mIpExceptionAction, 
-		                                            mHockeyStreamsModel, 
-		                                            mHockeyStreamsExecutor ) , 
-		                   HockeyStreamsComponent.createGetLiveStreamsAction( mGetLiveStreamsAction, 
-		                                               mHockeyStreamsModel, 
-		                                               mHockeyStreamsExecutor ) );
+		                   mLoginActionExecutable, 
+		                   mIpExceptionActionExecutable, 
+		                   mGetLiveStreamsActionExecutable );
 	}
 
     public JComponent getComponent()
@@ -106,45 +122,26 @@ class HockeyStreamsComponent
 			}
 		};
 	}
+    
+    private static ActionExecutable createLoginActionExecutable( ExecutableProcess<LoginResponse> loginActionExecutable,
+                                                                 Executor executor,
+                                                                 Vetoer vetoer )
+    {
+        return buildActionExecutable( loginActionExecutable, createActionModel( vetoer ), executor );
+    }
 
-	private static Action createGetLiveStreamsAction( ExecutableProcess<GetLiveResponse> getLiveStreamsAction, 
-	                                                  HockeyStreamsModel model,
-	                                                  Executor executor )
+	private static ActionExecutable createGetLiveStreamsActionExecutable( ExecutableProcess<GetLiveResponse> getLiveStreamsAction, 
+	                                                                      Executor executor,
+	                                                                      Vetoer vetoer )
 	{
-	    final Action action = ActionBuilder.Builder( buildActionExecutable( getLiveStreamsAction, executor ) )
-	                                       .setButtonText( "Get Live Streams" )
-	                                       .setInitiallyEnabled( ! StringUtils.isBlank( model.getToken() ) )
-	                                       .build();
-	    model.addListener( new ModelListener<HockeyStreamsModel>()
-	    {
-	        @Override
-	        public void modelChanged( HockeyStreamsModel model )
-	        {
-	            action.setEnabled( ! StringUtils.isBlank( model.getToken() ) );
-	        }
-	    } );
-	    
-	    return action;
+	    return buildActionExecutable( getLiveStreamsAction, createActionModel( vetoer ), executor );
 	}
 
-	private static Action createIpExceptionAction( ExecutableProcess<IpExceptionResponse> ipExceptionAction, 
-												   HockeyStreamsModel model, 
-												   Executor executor )
+	private static ActionExecutable createIpExceptionActionExecutable( ExecutableProcess<IpExceptionResponse> ipExceptionAction, 
+	                                                                   Executor executor,
+	                                                                   Vetoer vetoer )
 	{
-	    final Action action = ActionBuilder.Builder( buildActionExecutable( ipExceptionAction, executor ) )
-	                                       .setButtonText( "Generate Ip Exception" )
-	                                       .setInitiallyEnabled( ! StringUtils.isBlank( model.getToken() ) )
-	                                       .build();
-	    model.addListener( new ModelListener<HockeyStreamsModel>()
-	    {
-	        @Override
-	        public void modelChanged( HockeyStreamsModel model )
-	        {
-	            action.setEnabled( ! StringUtils.isBlank( model.getToken() ) );
-	        }
-	    } );
-	    
-	    return action;
+	    return buildActionExecutable( ipExceptionAction, createActionModel( vetoer ), executor );
 	}
 
 	private static ProcessListener<GetLiveResponse> createGetLiveListener()
@@ -259,11 +256,15 @@ class HockeyStreamsComponent
     private static JComponent buildGui( LoginPanelModel loginPanelModel, 
                                         HockeyStreamsModel hockeyStreamsModel,
                                         ProgressPanelModel progressPanelModel,
-	                                    Action loginAction, 
-	                                    Action ipExceptionAction,
-	                                    Action getLiveStreamsAction )
+	                                    ActionExecutable loginActionExecutable, 
+	                                    ActionExecutable ipExceptionActionExecutable,
+	                                    ActionExecutable getLiveStreamsActionExecutable )
 	{
 		JPanel panel = new JPanel( new BorderLayout() );
+		
+        Action loginAction = createAction( loginActionExecutable, "Login" );
+        Action ipExceptionAction = createAction( ipExceptionActionExecutable, "Generate Ip Exception" );
+        Action getLiveStreamsAction = createAction( getLiveStreamsActionExecutable, "Get Live Streams" );
 		
 		panel.add( new LoginPanel( loginPanelModel, loginAction ).getCompnent(), BorderLayout.NORTH );
 		panel.add( new ActionPanel( ipExceptionAction, getLiveStreamsAction ).getComponent(), 
@@ -272,26 +273,4 @@ class HockeyStreamsComponent
 		
 		return panel;
 	}
-    
-    private static Action createLoginAction( ExecutableProcess<LoginResponse> loginActionExecutable,
-                                             LoginPanelModel model,
-                                             Executor executor )
-    {
-        final Action action = ActionBuilder.Builder( buildActionExecutable( loginActionExecutable, 
-                                                                            executor ) )
-                                           .setButtonText( "Login" )
-                                           .setInitiallyEnabled( model.canAuthenticate() )
-                                           .build();
-        
-        model.addListener( new ModelListener<LoginPanelModel>()
-        {
-            @Override
-            public void modelChanged( LoginPanelModel model )
-            {
-                action.setEnabled( model.canAuthenticate() );
-            }
-        } );
-        
-        return action;
-    }
 }

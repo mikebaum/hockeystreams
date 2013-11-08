@@ -1,6 +1,8 @@
 package org.mbaum.common.action;
 
-public interface ActionExecutable
+import org.mbaum.common.Destroyable;
+
+public interface ActionExecutable extends Destroyable
 {
     void execute();
     

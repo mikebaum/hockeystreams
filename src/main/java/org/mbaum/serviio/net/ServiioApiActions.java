@@ -3,8 +3,6 @@ package org.mbaum.serviio.net;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.URIBuilder;
@@ -28,20 +26,6 @@ public final class ServiioApiActions
 	{
 		return new HttpProcess<PingContext, PingResponse>( Parsers.newJsonParser( PingResponse.class ), "ping" )
 		{
-			@Override
-			public boolean canExecuteWith( PingContext context )
-			{
-				ServiioModel serviioModel = context.getServiioModel();
-				
-				if ( StringUtils.isBlank( serviioModel.getHostName() ) )
-					return false;
-				
-				if ( StringUtils.isBlank( serviioModel.getPort() ) )
-					return false;
-				
-				return NumberUtils.isNumber( serviioModel.getPort() ); 
-			}
-
 			@Override
 			protected HttpUriRequest buildRequest( PingContext context ) 
 			    throws NumberFormatException, URISyntaxException

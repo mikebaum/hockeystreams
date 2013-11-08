@@ -8,7 +8,7 @@ import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
-public class JsonResponseParser<R> implements ResponseParser<R>
+class JsonResponseParser<R> implements ResponseParser<R>
 {
 	private static final Logger LOGGER = Logger.getLogger( JsonResponseParser.class );
 	private final Class<R> mResultClass;

@@ -39,12 +39,6 @@ class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutablePr
     }
 
     @Override
-    public boolean canExecute()
-    {
-        return mProcess.canExecuteWith( mContext );
-    }
-
-    @Override
     public void addListener( ProcessListener<R> listener )
     {
         mProcessListeners.addListener( listener );

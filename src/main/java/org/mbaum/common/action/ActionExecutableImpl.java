@@ -8,22 +8,45 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessListener;
+import org.mbaum.common.model.ModelListener;
 
 import com.google.common.base.Preconditions;
 
-final class ActionExecutableImpl implements ActionExecutable
+final class ActionExecutableImpl<T> implements ActionExecutable
 {
-    private final ExecutableProcess<?> mExecutableProcess;
     private final long mThreadId;
+    private final AtomicBoolean mIsExecuting = new AtomicBoolean( false );
+    private final Executor mExecutor;
+    private final ExecutableProcess<T> mExecutableProcess;
+    private final ProcessListener<T> mProcessListener;
+    private final ActionModel mActionModel;
+    private final ModelListener<ActionModel> mActionModelListener;
+    
     private ActionExecutableListener mListener = WARNING_LISTENER;
-    private AtomicBoolean mIsExecuting = new AtomicBoolean( false );
-    private Executor mExecutor;
 
-    private ActionExecutableImpl( ExecutableProcess<?> executableProcess, Executor executor )
+    
+    private ActionExecutableImpl( ExecutableProcess<T> executableProcess, 
+                                  ActionModel actionModel, 
+                                  Executor executor )
     {
+        mActionModel = actionModel;
         mExecutor = executor;
         mThreadId = Thread.currentThread().getId();
         mExecutableProcess = executableProcess;
+        
+        mActionModelListener = createActionModelListener( this );
+        actionModel.addListener( mActionModelListener );
+        
+        mProcessListener = createIsFinishedListener( executableProcess, this );
+        executableProcess.addListener( mProcessListener );
+    }
+    
+    @Override
+    public void destroy()
+    {
+        mListener = null;
+        mActionModel.removeListener( mActionModelListener );
+        mExecutableProcess.removeListener( mProcessListener );
     }
 
     @Override
@@ -37,7 +60,7 @@ final class ActionExecutableImpl implements ActionExecutable
     public boolean isEnabled()
     {
         checkThread();
-        return mExecutableProcess.canExecute() && mIsExecuting.get() == false;
+        return mActionModel.isEnabled() && ! mIsExecuting.get();
     }
 
     @Override
@@ -50,7 +73,12 @@ final class ActionExecutableImpl implements ActionExecutable
     private void setExecuting( boolean isExecuting )
     {
         if ( mIsExecuting.getAndSet( isExecuting ) != isExecuting )
-            mListener.actionEnabledChanged();
+            fireActionEnabledChanged();
+    }
+    
+    private void fireActionEnabledChanged()
+    {
+        mListener.actionEnabledChanged();
     }
 
     private void checkThread()
@@ -80,11 +108,23 @@ final class ActionExecutableImpl implements ActionExecutable
             }
         };
     }
-    
-    public static <T> ActionExecutable createActionExecutable( ExecutableProcess<T> executableProcess, Executor executor )
+
+    private static <T> ModelListener<ActionModel> createActionModelListener( final ActionExecutableImpl<T> actionExecutable )
     {
-    	ActionExecutableImpl actionExecutable = new ActionExecutableImpl( executableProcess, executor );
-    	executableProcess.addListener( createIsFinishedListener( executableProcess, actionExecutable ) );
-    	return actionExecutable;
+        return new ModelListener<ActionModel>()
+        {
+            @Override
+            public void modelChanged( ActionModel model )
+            {
+                actionExecutable.fireActionEnabledChanged();
+            }
+        };
+    }
+    
+    public static <T> ActionExecutable createActionExecutable( ExecutableProcess<T> executableProcess, 
+                                                               ActionModel actionModel, 
+                                                               Executor executor )
+    {
+    	return new ActionExecutableImpl<T>( executableProcess, actionModel, executor );
     }
 }

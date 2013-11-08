@@ -1,4 +1,4 @@
-package org.mbaum.serviio;
+package org.mbaum.serviio.view;
 
 import java.awt.BorderLayout;
 import java.awt.event.KeyAdapter;

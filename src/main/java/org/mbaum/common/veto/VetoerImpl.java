@@ -49,7 +49,7 @@ class VetoerImpl<M extends Model<M>> implements Vetoer
 	
 	private void updateVetoing()
 	{
-		boolean isVetoing = mValidator.isValid( mModel );
+		boolean isVetoing = ! mValidator.isValid( mModel );
 		
 		if ( mVetoing.compareAndSet( ! isVetoing, isVetoing ) )
 			mListener.vetoChanged();
@@ -66,7 +66,7 @@ class VetoerImpl<M extends Model<M>> implements Vetoer
 	public void setListener( VetoListener listener )
 	{
 		Preconditions.checkNotNull( listener );
-		Preconditions.checkState( NULL_LISTENER.equals( listener ) );
+		Preconditions.checkState( NULL_LISTENER.equals( mListener ) );
 		mListener = listener;
 	}
 	
