@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.mbaum.common.model.ProgressPanelModel;
+import org.mbaum.common.model.ProgressPanelModelImpl;
 
 public class ProgressPanelExecutor implements ProcessExecutorService
 {
@@ -111,7 +112,7 @@ public class ProgressPanelExecutor implements ProcessExecutorService
 	
 	@Override
 	public <C extends ProcessContext, R> ExecutableProcess<R> 
-		buildExecutableProcess( final Process<C, R> process, 
+		buildExecutableProcess( Process<C, R> process, 
 				                C context, 
 				                ProcessListener<R> listener )
 	{

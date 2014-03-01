@@ -44,7 +44,7 @@ class VetoerImpl<M extends Model<M>> implements Vetoer
 	public void destroy()
 	{
 		mModel.removeListener( mModelListener );
-		mListener = null;
+		mListener = NULL_LISTENER;
 	}
 	
 	private void updateVetoing()
@@ -53,7 +53,6 @@ class VetoerImpl<M extends Model<M>> implements Vetoer
 		
 		if ( mVetoing.compareAndSet( ! isVetoing, isVetoing ) )
 			mListener.vetoChanged();
-			
 	}
 	
 	@Override

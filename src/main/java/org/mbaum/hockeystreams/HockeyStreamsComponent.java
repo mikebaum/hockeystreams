@@ -30,11 +30,14 @@ import org.mbaum.common.execution.ProcessListener;
 import org.mbaum.common.execution.ProcessListener.ProcessListenerAdapter;
 import org.mbaum.common.execution.ResultHandler;
 import org.mbaum.common.model.ProgressPanelModel;
+import org.mbaum.common.model.ProgressPanelModelImpl;
 import org.mbaum.common.veto.Vetoer;
 import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.ProgressPanel;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
+import org.mbaum.hockeystreams.model.HockeyStreamsModelImpl;
 import org.mbaum.hockeystreams.model.LoginPanelModel;
+import org.mbaum.hockeystreams.model.LoginPanelModelImpl;
 import org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.GetLiveStreamsContext;
 import org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.IpExectionsContext;
 import org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.LoginContext;
@@ -59,9 +62,9 @@ class HockeyStreamsComponent
 	
 	public HockeyStreamsComponent( JFrame parent )
 	{
-		mLoginPanelModel = new LoginPanelModel();
-		mHockeyStreamsModel = new HockeyStreamsModel();
-		mProgressPanelModel = new ProgressPanelModel();
+		mLoginPanelModel = new LoginPanelModelImpl();
+		mHockeyStreamsModel = new HockeyStreamsModelImpl();
+		mProgressPanelModel = new ProgressPanelModelImpl();
 		mHockeyStreamsExecutor = createProgressPanelExecutor( mProgressPanelModel );
 		
         mLoginProcess = 

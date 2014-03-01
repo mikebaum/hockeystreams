@@ -1,23 +1,11 @@
 package org.mbaum.hockeystreams.model;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.mbaum.common.model.AbstractModel;
+import org.mbaum.common.model.Model;
 
-public class HockeyStreamsModel extends AbstractModel<HockeyStreamsModel>
+public interface HockeyStreamsModel extends Model<HockeyStreamsModel>
 {
-    private String mToken;
+	void setSessionToken( String token );
 
-    public void setSessionToken( String token )
-    {
-        if ( ObjectUtils.equals( mToken, token ) )
-            return;
-        
-        mToken = token;
-        notifyListeners( this );
-    }
-    
-    public String getToken()
-    {
-        return mToken;
-    }
+	String getToken();
+
 }

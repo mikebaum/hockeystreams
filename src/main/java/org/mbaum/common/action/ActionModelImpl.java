@@ -1,9 +1,9 @@
 package org.mbaum.common.action;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.mbaum.common.model.AbstractModel;
+import org.mbaum.common.model.ModelValue;
 import org.mbaum.common.veto.VetoListener;
 import org.mbaum.common.veto.Vetoer;
 
@@ -12,8 +12,12 @@ import com.google.common.collect.Lists;
 public class ActionModelImpl extends AbstractModel<ActionModel> implements ActionModel
 {
 	private final List<Vetoer> mVetoers = Lists.newArrayList();
+	private final ModelValue<Boolean> mEnabled;
 	
-	private final AtomicBoolean mEnabled = new AtomicBoolean();
+	public ActionModelImpl()
+    {
+		mEnabled = newVolatileModelValue( false );
+    }
 	
 	@Override
 	public void destroy()
@@ -48,8 +52,7 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 	        }
 	    }
 	    
-	    if ( mEnabled.compareAndSet( ! isEnabled, isEnabled ) )
-	        notifyListeners( this );
+	    mEnabled.set( isEnabled );
 	}
 
 	private VetoListener createVetoerListener()

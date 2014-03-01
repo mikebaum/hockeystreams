@@ -14,6 +14,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import org.mbaum.hockeystreams.model.LoginPanelModel;
+import org.mbaum.hockeystreams.model.LoginPanelModelImpl;
 
 public class LoginPanel
 {

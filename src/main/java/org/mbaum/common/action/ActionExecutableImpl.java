@@ -91,7 +91,7 @@ final class ActionExecutableImpl<T> implements ActionExecutable
     }
     
     private static <T> ProcessListener<T> createIsFinishedListener( final ExecutableProcess<T> executableProcess,
-    																final ActionExecutableImpl actionExecutable )
+    																final ActionExecutableImpl<T> actionExecutable )
     {
         return new ProcessListener.ProcessListenerAdapter<T>()
         {
