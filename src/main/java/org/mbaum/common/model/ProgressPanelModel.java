@@ -1,12 +1,18 @@
 package org.mbaum.common.model;
 
-public interface ProgressPanelModel extends Model<ProgressPanelModel>
+import org.mbaum.common.model.Model.ModelValueId;
+
+
+public interface ProgressPanelModel extends Model<ProgressPanelModel.Id<?>, ProgressPanelModel>
 {
-	String getMessage();
-
-	void setMessage( String message );
-
-	boolean isIndeterminant();
-
-	void setIndeterminant( boolean indeterminant );
+	interface Id<T> extends ModelValueId<T>{}
+	
+	public static final Id<String> MESSAGE = new Id<String>(){};
+	public static final Id<Boolean> INDETERMINATE = new Id<Boolean>(){};
+	
+	<T> MutableModelValue<T> getModelValue( Id<T> id );
+	
+	<T> T getValue( Id<T> id );
+	
+	<T> void setValue( Id<T> id, T value );
 }

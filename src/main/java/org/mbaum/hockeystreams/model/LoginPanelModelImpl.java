@@ -1,62 +1,40 @@
 package org.mbaum.hockeystreams.model;
 
-import static org.mbaum.common.model.ModelValue.Builder.newModelValue;
-
-import org.apache.commons.lang3.StringUtils;
+import org.mbaum.common.listener.ListenableSupport;
+import org.mbaum.common.listener.Listener;
 import org.mbaum.common.model.AbstractModel;
-import org.mbaum.common.model.ModelValue;
-import org.mbaum.common.model.Notifier;
+import org.mbaum.common.model.MutableModelValue;
 
-public class LoginPanelModelImpl extends AbstractModel<LoginPanelModel> implements LoginPanelModel
+public class LoginPanelModelImpl extends AbstractModel<LoginPanelModel.Id<?>, LoginPanelModel> implements LoginPanelModel
 {
-	private final ModelValue<String> mUsername;
-	private final ModelValue<String> mPassword;
-	private final ModelValue<String> mApiKey;
-	
 	public LoginPanelModelImpl()
     {
-		mUsername = newModelValue( "mbaum" );
-		mPassword = newModelValue( "" );
-		mApiKey = newModelValue( "1dd7bceb51c69ba4190a5be6d59ee41e" );
+		super();
+		newModelValue( USERNAME, "mbaum", "Username", this );
+		newModelValue( PASSWORD, "", "Pasword", this );
+		newModelValue( API_KEY, "1dd7bceb51c69ba4190a5be6d59ee41e", "Api Key", this );
     }
 	
-	public String getUsername()
+	public <T> MutableModelValue<T> getModelValue( Id<T> id )
 	{
-		return mUsername.get();
+	    return super.getModelValue( id );
 	}
 	
-	public boolean canAuthenticate()
+	@Override
+	public <T> T getValue( Id<T> id )
 	{
-		return ! StringUtils.isBlank( getUsername() ) &&
-		       ! StringUtils.isBlank( getPassword() );
+	    return getModelValue( id ).get();
+	}
+	
+	@Override
+	public <T> void setValue( Id<T> id, T value )
+	{
+		getModelValue( id ).set( value );
 	}
 
 	@Override
-    public void setUsername( String username )
-	{
-		mUsername.set( username );
-	}
-	
-	public String getPassword()
-	{
-		return mPassword.get();
-	}
-	
-	@Override
-    public void setPassword( String password )
-	{
-		mPassword.set( password );
-	}
-	
-	public String getApiKey()
-	{
-		return mApiKey.get();
-	}
-
-	@Override
-	public String toString()
-	{
-		return "ExceptionPanelModel [mUsername=" + mUsername
-				+ ", mPassword=" + mPassword + "]";
-	}
+    protected ListenableSupport<LoginPanelModel, Listener<LoginPanelModel>> createListenableSupport()
+    {
+	    return createModelListenerSupport( (LoginPanelModel) this );
+    }
 }

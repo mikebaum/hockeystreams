@@ -8,13 +8,19 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-public class ActionPanel
+public class ActionPanel implements View
 {
     private final JComponent mActionToolBar;
     
     public ActionPanel( Action... actions )
     {
         mActionToolBar = buildActionPanel( actions );
+    }
+    
+	@Override
+    public void destroy()
+    {
+	    // TODO Auto-generated method stub
     }
     
     public JComponent getComponent()

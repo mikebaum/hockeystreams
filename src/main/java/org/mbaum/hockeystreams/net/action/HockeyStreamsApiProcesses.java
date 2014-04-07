@@ -1,6 +1,10 @@
 package org.mbaum.hockeystreams.net.action;
 
 import static org.mbaum.common.net.parse.Parsers.newJsonParser;
+import static org.mbaum.hockeystreams.model.HockeyStreamsModel.SESSION_TOKEN;
+import static org.mbaum.hockeystreams.model.LoginPanelModel.API_KEY;
+import static org.mbaum.hockeystreams.model.LoginPanelModel.PASSWORD;
+import static org.mbaum.hockeystreams.model.LoginPanelModel.USERNAME;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -60,7 +64,7 @@ public class HockeyStreamsApiProcesses
 			{
 				HttpEntity entity = 
 				        EntityBuilder.create()
-				                     .setParameters( new BasicNameValuePair( "token", context.getModel().getToken() ) )
+				                     .setParameters( new BasicNameValuePair( "token", context.getModel().getValue( SESSION_TOKEN ) ) )
 				                     .build();
 				
 				return RequestBuilder.post().setUri( HOCKEYSTREAMS_API_URL + IP_EXCEPTION_PATH )
@@ -79,7 +83,7 @@ public class HockeyStreamsApiProcesses
 			protected HttpUriRequest buildRequest( GetLiveStreamsContext context )
 			{
 	            return RequestBuilder.get().setUri( HOCKEYSTREAMS_API_URL + GET_LIVE_PATH )
-	            		                   .addParameter( "token", context.getModel().getToken() )
+	            		                   .addParameter( "token", context.getModel().getValue( SESSION_TOKEN ) )
 	            		                   .addHeader( "content-type", "application/x-www-form-urlencoded" )
 	            		                   .build();
 			}
@@ -97,9 +101,9 @@ public class HockeyStreamsApiProcesses
 				
 				HttpEntity entity = 
 			        EntityBuilder.create()
-								  .setParameters( new BasicNameValuePair( "username", loginPanelModel.getUsername() ),
-										  		  new BasicNameValuePair( "password", loginPanelModel.getPassword() ),
-										  		  new BasicNameValuePair( "key", loginPanelModel.getApiKey() ) )
+								  .setParameters( new BasicNameValuePair( "username", loginPanelModel.getValue( USERNAME ) ),
+										  		  new BasicNameValuePair( "password", loginPanelModel.getValue( PASSWORD ) ),
+										  		  new BasicNameValuePair( "key", loginPanelModel.getValue( API_KEY ) ) )
 								  .build();
 				
 				return RequestBuilder.post()
@@ -118,7 +122,7 @@ public class HockeyStreamsApiProcesses
             @Override
             public boolean isValid( HockeyStreamsModel model )
             {
-                return ! StringUtils.isBlank( model.getToken() );
+                return ! StringUtils.isBlank( model.getValue( SESSION_TOKEN ) );
             }
         };
     }
@@ -130,13 +134,13 @@ public class HockeyStreamsApiProcesses
             @Override
             public boolean isValid( LoginPanelModel model )
             {
-                if ( StringUtils.isBlank( model.getUsername() ) )
+                if ( StringUtils.isBlank( model.getValue( USERNAME ) ) )
                     return false;
                 
-                if ( StringUtils.isBlank( model.getPassword() ) )
+                if ( StringUtils.isBlank( model.getValue( PASSWORD ) ) )
                     return false;
                 
-                return ! StringUtils.isBlank( model.getApiKey() );
+                return ! StringUtils.isBlank( model.getValue( API_KEY ) );
             }
         };
     }

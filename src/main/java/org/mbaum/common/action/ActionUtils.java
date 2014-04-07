@@ -53,9 +53,9 @@ public final class ActionUtils
         return createAction( executable, null, icon );
     }
     
-    public static ActionModel createActionModel( Vetoer... vetoers )
+    public static ActionModel createActionModel( String description, Vetoer... vetoers )
     {
-        ActionModel actionModel = new ActionModelImpl();
+        ActionModel actionModel = new ActionModelImpl( description );
         
         for ( Vetoer vetoer : vetoers )
             actionModel.addVetoer( vetoer );

@@ -2,21 +2,25 @@ package org.mbaum.common.action;
 
 import java.util.List;
 
+import org.mbaum.common.listener.ListenableSupport;
+import org.mbaum.common.listener.Listener;
 import org.mbaum.common.model.AbstractModel;
-import org.mbaum.common.model.ModelValue;
+import org.mbaum.common.model.MutableModelValue;
 import org.mbaum.common.veto.VetoListener;
 import org.mbaum.common.veto.Vetoer;
 
 import com.google.common.collect.Lists;
 
-public class ActionModelImpl extends AbstractModel<ActionModel> implements ActionModel
+public class ActionModelImpl extends AbstractModel<ActionModel.Id<?>, ActionModel> implements ActionModel
 {
 	private final List<Vetoer> mVetoers = Lists.newArrayList();
-	private final ModelValue<Boolean> mEnabled;
+	private final MutableModelValue<Boolean> mEnabled;
+	private final String mDescription;
 	
-	public ActionModelImpl()
+	public ActionModelImpl( String description )
     {
-		mEnabled = newVolatileModelValue( false );
+		mDescription = description;
+		mEnabled = newVolatileModelValue( ENABLED, false, "Enabled", this );
     }
 	
 	@Override
@@ -27,9 +31,21 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 	}
 	
 	@Override
-	public boolean isEnabled()
+	public <T> MutableModelValue<T> getModelValue( Id<T> id )
 	{
-	    return mEnabled.get();
+	    return super.getModelValue( id );
+	}
+	
+	@Override
+	public <T> T getValue( Id<T> id )
+	{
+	    return getModelValue( id ).get();
+	}
+	
+	@Override
+	public <T> void setValue( Id<T> id, T value )
+	{
+		getModelValue( id ).set( value );
 	}
 	
 	@Override
@@ -38,6 +54,12 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 	    mVetoers.add( vetoer );
 		vetoer.setListener( createVetoerListener() );
 		updateEnabled();
+	}
+	
+	@Override
+	protected ListenableSupport<ActionModel, Listener<ActionModel>> createListenableSupport()
+	{
+	    return createModelListenerSupport( (ActionModel) this );
 	}
 	
 	private void updateEnabled()
@@ -74,4 +96,10 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 		
 		mVetoers.clear();
 	}
+
+	@Override
+    public String getDescription()
+    {
+	    return mDescription;
+    }
 }

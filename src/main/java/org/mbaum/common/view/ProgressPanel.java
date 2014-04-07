@@ -1,5 +1,8 @@
 package org.mbaum.common.view;
 
+import static org.mbaum.common.model.ProgressPanelModel.INDETERMINATE;
+import static org.mbaum.common.model.ProgressPanelModel.MESSAGE;
+
 import java.awt.BorderLayout;
 
 import javax.swing.BorderFactory;
@@ -7,10 +10,10 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
-import org.mbaum.common.model.ModelListener;
+import org.mbaum.common.listener.Listener;
 import org.mbaum.common.model.ProgressPanelModel;
 
-public class ProgressPanel
+public class ProgressPanel implements View
 {
     private final JProgressBar mProgressBar;
     private final JComponent mPanel;
@@ -20,6 +23,12 @@ public class ProgressPanel
         mProgressBar = createProgressBar();
         mPanel = initGui( mProgressBar );
         model.addListener( createProgressModelListener( mProgressBar ) );
+    }
+    
+	@Override
+    public void destroy()
+    {
+	    // TODO Auto-generated method stub
     }
 
 	public JComponent getComponent()
@@ -45,16 +54,16 @@ public class ProgressPanel
         return panel;
     }
     
-    private static ModelListener<ProgressPanelModel> createProgressModelListener( final JProgressBar progressBar )
+    private static Listener<ProgressPanelModel> createProgressModelListener( final JProgressBar progressBar )
 	{
-		return new ModelListener<ProgressPanelModel>()
+		return new Listener<ProgressPanelModel>()
 		{
 			@Override
-			public void modelChanged( ProgressPanelModel model )
-			{
-				progressBar.setIndeterminate( model.isIndeterminant() );
-				progressBar.setString( model.getMessage() );
-			}
+            public void handleChanged( ProgressPanelModel model )
+            {
+				progressBar.setIndeterminate( model.getValue( INDETERMINATE ) );
+				progressBar.setString( model.getValue( MESSAGE ) );
+            }
 		};
 	}
 }

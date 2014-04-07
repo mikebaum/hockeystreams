@@ -1,5 +1,8 @@
 package org.mbaum.serviio.view;
 
+import static org.mbaum.serviio.model.ServiioModel.HOST_NAME;
+import static org.mbaum.serviio.model.ServiioModel.PORT;
+
 import java.awt.BorderLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -10,9 +13,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.mbaum.common.view.View;
 import org.mbaum.serviio.model.ServiioModel;
 
-public class ServiioPanel
+public class ServiioPanel implements View
 {
 	private static final String SERVIIO_HOSTNAME_LABEL_TEXT = "Serviio Host Name:";
 	private static final String SERVIIO_PORT_LABEL_TEXT = "Port:";
@@ -39,13 +43,13 @@ public class ServiioPanel
 
 		JLabel servvioHostNameLabel = new JLabel( SERVIIO_HOSTNAME_LABEL_TEXT );
 		urlPanel.add( servvioHostNameLabel );
-		serviioHostNameField.setText( model.getHostName() );
+		serviioHostNameField.setText( model.getValue( HOST_NAME ) );
 		serviioHostNameField.addKeyListener( createHostNameFieldKeyListener( model, serviioHostNameField ) );
 		urlPanel.add( serviioHostNameField );
 		
 		JLabel serviioPortLabel = new JLabel( SERVIIO_PORT_LABEL_TEXT );
 		urlPanel.add( serviioPortLabel );
-		serviioPortField.setText( model.getPort() );
+		serviioPortField.setText( model.getValue( PORT ) );
 		serviioPortField.addKeyListener( createPortFieldKeyListener( model, serviioPortField ) );
 		urlPanel.add( serviioPortField );
 		
@@ -57,6 +61,13 @@ public class ServiioPanel
 		return topPanel;
 	}
 	
+	@Override
+    public void destroy()
+    {
+	    // TODO Auto-generated method stub
+    }
+	
+	@Override
 	public JComponent getComponent()
 	{
 		return mPanel;
@@ -70,7 +81,7 @@ public class ServiioPanel
             @Override
             public void keyReleased( KeyEvent e )
             {
-                model.setPort( new String ( portField.getText() ) );
+                model.setValue( PORT, new String ( portField.getText() ) );
             }
         };
     }
@@ -83,7 +94,7 @@ public class ServiioPanel
             @Override
             public void keyReleased( KeyEvent e )
             {
-                model.setHostName( hostNameField.getText() );
+                model.setValue( HOST_NAME, hostNameField.getText() );
             }
         };
     }

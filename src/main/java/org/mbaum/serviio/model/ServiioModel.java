@@ -1,52 +1,22 @@
 package org.mbaum.serviio.model;
 
-import org.mbaum.common.model.AbstractModel;
-import org.mbaum.common.model.ModelValue;
+import org.mbaum.common.model.Model;
+import org.mbaum.common.model.Model.ModelValueId;
+import org.mbaum.common.model.MutableModelValue;
+import org.mbaum.serviio.model.ServiioModel.Id;
 import org.mbaum.serviio.net.transferobject.RepositoryResponse;
 
-public class ServiioModel extends AbstractModel<ServiioModel>
+public interface ServiioModel extends Model<Id<?>, ServiioModel>
 {
-	private static final String DEFAULT_HOSTNAME = "localhost";
-	private static final String DEFAULT_PORT = "23423";
+	public interface Id<T> extends ModelValueId<T>{}
 	
-	private final ModelValue<String> mHostName;
-	private final ModelValue<String> mPort;
+	public static final Id<String> HOST_NAME = new Id<String>(){};
+	public static final Id<String> PORT = new Id<String>(){};
+	public static final Id<RepositoryResponse> REPOSITORY_RESPONSE = new Id<RepositoryResponse>(){};
 	
-	private RepositoryResponse mRepositoryResponse;
+	<T> MutableModelValue<T> getModelValue( Id<T> id );
 	
-	public ServiioModel()
-    {
-		mHostName = newModelValue( DEFAULT_HOSTNAME );
-		mPort = newModelValue( DEFAULT_PORT );
-    }
+	<T> T getValue( Id<T> id );
 	
-	public String getHostName()
-	{
-		return mHostName.get();
-	}
-	
-	public void setHostName( String hostName )
-	{
-		mHostName.set( hostName );
-	}
-	
-	public String getPort()
-	{
-		return mPort.get();
-	}
-	
-	public void setPort( String port )
-	{
-		mPort.set( port );
-	}
-	
-	public RepositoryResponse getRepositoryResponse()
-	{
-		return mRepositoryResponse;
-	}
-	
-	public void setRepositoryResponse( RepositoryResponse repositoryResponse )
-	{
-		mRepositoryResponse = repositoryResponse;
-	}
+	<T> void setValue( Id<T> id, T value );
 }

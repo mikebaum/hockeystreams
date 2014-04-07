@@ -1,6 +1,7 @@
 package org.mbaum.common.action;
 
 import static org.mbaum.common.action.ActionExecutableListener.WARNING_LISTENER;
+import static org.mbaum.common.action.ActionModel.ENABLED;
 import static org.mbaum.common.execution.ProcessUtils.createExecutbleProcessRunnable;
 
 import java.util.concurrent.Executor;
@@ -8,7 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessListener;
-import org.mbaum.common.model.ModelListener;
+import org.mbaum.common.execution.ProcessListenerAdapter;
+import org.mbaum.common.listener.Listener;
 
 import com.google.common.base.Preconditions;
 
@@ -20,7 +22,7 @@ final class ActionExecutableImpl<T> implements ActionExecutable
     private final ExecutableProcess<T> mExecutableProcess;
     private final ProcessListener<T> mProcessListener;
     private final ActionModel mActionModel;
-    private final ModelListener<ActionModel> mActionModelListener;
+    private final Listener<ActionModel> mActionModelListener;
     
     private ActionExecutableListener mListener = WARNING_LISTENER;
 
@@ -37,7 +39,7 @@ final class ActionExecutableImpl<T> implements ActionExecutable
         mActionModelListener = createActionModelListener( this );
         actionModel.addListener( mActionModelListener );
         
-        mProcessListener = createIsFinishedListener( executableProcess, this );
+        mProcessListener = createIsFinishedListener( executableProcess, actionModel.getDescription(), this );
         executableProcess.addListener( mProcessListener );
     }
     
@@ -60,7 +62,7 @@ final class ActionExecutableImpl<T> implements ActionExecutable
     public boolean isEnabled()
     {
         checkThread();
-        return mActionModel.isEnabled() && ! mIsExecuting.get();
+        return mActionModel.getValue( ENABLED ) && ! mIsExecuting.get();
     }
 
     @Override
@@ -91,30 +93,31 @@ final class ActionExecutableImpl<T> implements ActionExecutable
     }
     
     private static <T> ProcessListener<T> createIsFinishedListener( final ExecutableProcess<T> executableProcess,
+                                                                    final String description,
     																final ActionExecutableImpl<T> actionExecutable )
     {
-        return new ProcessListener.ProcessListenerAdapter<T>()
+        return new ProcessListenerAdapter<T>()
         {
         	@Override
-        	public void processStarted()
+        	public void handleStarted()
         	{
         		actionExecutable.setExecuting( true );
         	}
         	
             @Override
-            public void processFinished()
+            public void handleFinished()
             {
             	actionExecutable.setExecuting( false );
             }
         };
     }
 
-    private static <T> ModelListener<ActionModel> createActionModelListener( final ActionExecutableImpl<T> actionExecutable )
+    private static <T> Listener<ActionModel> createActionModelListener( final ActionExecutableImpl<T> actionExecutable )
     {
-        return new ModelListener<ActionModel>()
+        return new Listener<ActionModel>()
         {
             @Override
-            public void modelChanged( ActionModel model )
+            public void handleChanged( ActionModel model )
             {
                 actionExecutable.fireActionEnabledChanged();
             }

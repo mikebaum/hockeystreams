@@ -12,53 +12,53 @@ public class ProcessListenerWrapper<R> implements ProcessListener<R>
     }
     
     @Override
-    public void processStarted()
+    public void handleStarted()
     {
         mInvoker.invoke( new Runnable()
         {
             @Override
             public void run()
             {
-                mListener.processStarted();
+                mListener.handleStarted();
             }
         } );
     }
 
     @Override
-    public void processSucceeded( final R result )
+    public void handleResult( final R result )
     {
         mInvoker.invoke( new Runnable()
         {
             @Override
             public void run()
             {
-                mListener.processSucceeded( result );
+                mListener.handleResult( result );
             }
         } );
     }
 
     @Override
-    public void processFailed( final Exception exception )
+    public void handleFailed( final Exception exception )
     {
         mInvoker.invoke( new Runnable()
         {
             @Override
             public void run()
             {
-                mListener.processFailed( exception );
+                mListener.handleFailed( exception );
             }
         } );
     }
 
     @Override
-    public void processFinished()
+    public void handleFinished()
     {
         mInvoker.invoke( new Runnable()
         {
             @Override
             public void run()
             {
-                mListener.processFinished();
+                mListener.handleFinished();
             }
         } );
     }

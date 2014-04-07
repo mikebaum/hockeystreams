@@ -4,6 +4,7 @@ import static org.mbaum.common.action.ActionUtils.buildActionExecutable;
 import static org.mbaum.common.action.ActionUtils.createAction;
 import static org.mbaum.common.action.ActionUtils.createActionModel;
 import static org.mbaum.common.execution.ProgressPanelExecutor.createProgressPanelExecutor;
+import static org.mbaum.common.model.ProgressPanelModel.MESSAGE;
 import static org.mbaum.common.veto.Vetoers.createVetoer;
 import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.GET_LIVE_STREAMS_ACTION;
 import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.GET_LIVE_VALIDATOR;
@@ -13,27 +14,30 @@ import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.LOGIN
 import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.LOGIN_VALIDATOR;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.util.concurrent.Executor;
 
 import javax.swing.Action;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.mbaum.common.Component;
+import org.mbaum.common.Destroyable;
 import org.mbaum.common.action.ActionExecutable;
 import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessExecutorService;
 import org.mbaum.common.execution.ProcessListener;
-import org.mbaum.common.execution.ProcessListener.ProcessListenerAdapter;
+import org.mbaum.common.execution.ProcessListenerAdapter;
 import org.mbaum.common.execution.ResultHandler;
 import org.mbaum.common.model.ProgressPanelModel;
 import org.mbaum.common.model.ProgressPanelModelImpl;
 import org.mbaum.common.veto.Vetoer;
 import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.ProgressPanel;
+import org.mbaum.common.view.View;
+import org.mbaum.common.view.ViewBuilder;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
 import org.mbaum.hockeystreams.model.HockeyStreamsModelImpl;
 import org.mbaum.hockeystreams.model.LoginPanelModel;
@@ -46,11 +50,16 @@ import org.mbaum.hockeystreams.net.transferobject.IpExceptionResponse;
 import org.mbaum.hockeystreams.net.transferobject.LoginResponse;
 import org.mbaum.hockeystreams.view.LoginPanel;
 
-class HockeyStreamsComponent
+public class HockeyStreamsComponent extends AbstractComponent implements Component
 {
+	private static final String LOGIN = "LOGIN";
+	private static final String IP_EXCEPTION = "IP_EXCEPTION";
+	private static final String LIVE_STREAMS = "LIVE_STREAMS";
+
+	static final Logger LOGGER = Logger.getLogger( HockeyStreamsComponent.class );
+	
 	private final LoginPanelModel mLoginPanelModel;
     private final HockeyStreamsModel mHockeyStreamsModel;
-    private final JComponent mPanel;
     private final ExecutableProcess<LoginResponse> mLoginProcess;
     private final ExecutableProcess<IpExceptionResponse> mIpExceptionProcess;
     private final ExecutableProcess<GetLiveResponse> mGetLiveStreamsProcess;
@@ -59,13 +68,14 @@ class HockeyStreamsComponent
     private final ActionExecutable mGetLiveStreamsActionExecutable;
     private final ProcessExecutorService mHockeyStreamsExecutor;
 	private final ProgressPanelModel mProgressPanelModel;
+	private final View mView;
 	
 	public HockeyStreamsComponent( JFrame parent )
 	{
-		mLoginPanelModel = new LoginPanelModelImpl();
-		mHockeyStreamsModel = new HockeyStreamsModelImpl();
-		mProgressPanelModel = new ProgressPanelModelImpl();
-		mHockeyStreamsExecutor = createProgressPanelExecutor( mProgressPanelModel );
+		mLoginPanelModel = d( new LoginPanelModelImpl() );
+		mHockeyStreamsModel = d( new HockeyStreamsModelImpl() );
+		mProgressPanelModel = d( new ProgressPanelModelImpl() );
+		mHockeyStreamsExecutor = createProgressPanelExecutor( mProgressPanelModel, "HockeyStreamsRESTApiExecutor" );
 		
         mLoginProcess = 
         		mHockeyStreamsExecutor.buildExecutableProcess( LOGIN_PROCESS,
@@ -81,32 +91,34 @@ class HockeyStreamsComponent
                                      						   createGetLiveContext( mHockeyStreamsModel ),
                                      						   createGetLiveListener() );
         
-		mLoginActionExecutable = createLoginActionExecutable( mLoginProcess,
-		                                                      mHockeyStreamsExecutor,
-		                                                      createVetoer( mLoginPanelModel, 
-		                                                                    LOGIN_VALIDATOR ) );
+		mLoginActionExecutable = d( createLoginActionExecutable( mLoginProcess,
+		                                                         mHockeyStreamsExecutor,
+		                                                         createVetoer( mLoginPanelModel, 
+		                                                                       LOGIN_VALIDATOR ) ) );
 		
-        mIpExceptionActionExecutable = createIpExceptionActionExecutable( mIpExceptionProcess, 
-                                                                          mHockeyStreamsExecutor,
-                                                                          createVetoer( mHockeyStreamsModel, 
-                                                                                        IP_EXCEPTION_VALIDATOR ) );
-        mGetLiveStreamsActionExecutable = createGetLiveStreamsActionExecutable( mGetLiveStreamsProcess, 
-                                                                                mHockeyStreamsExecutor,
-                                                                                createVetoer( mHockeyStreamsModel, 
-                                                                                              GET_LIVE_VALIDATOR ) );
-        mPanel = buildGui( mLoginPanelModel, 
-		                   mHockeyStreamsModel, 
-		                   mProgressPanelModel,
-		                   mLoginActionExecutable, 
-		                   mIpExceptionActionExecutable, 
-		                   mGetLiveStreamsActionExecutable );
+        mIpExceptionActionExecutable = d( createIpExceptionActionExecutable( mIpExceptionProcess, 
+                                                                             mHockeyStreamsExecutor,
+                                                                             createVetoer( mHockeyStreamsModel, 
+                                                                                           IP_EXCEPTION_VALIDATOR ) ) );
+        mGetLiveStreamsActionExecutable = d( createGetLiveStreamsActionExecutable( mGetLiveStreamsProcess, 
+                                                                                   mHockeyStreamsExecutor,
+                                                                                   createVetoer( mHockeyStreamsModel, 
+                                                                                                 GET_LIVE_VALIDATOR ) ) );
+        
+        mView = doBuildView( mLoginPanelModel, 
+                             mHockeyStreamsModel, 
+                             mProgressPanelModel, 
+                             mLoginActionExecutable, 
+                             mIpExceptionActionExecutable, 
+                             mGetLiveStreamsActionExecutable );
 	}
-
-    public JComponent getComponent()
-    {
-        return mPanel;
-    }
-
+	
+	@Override
+	public View getView()
+	{
+	    return mView;
+	}
+	
 	private static ResultHandler<LoginResponse> createLoginResultHandler( final ProgressPanelModel progressPanelModel )
 	{
 		return new ResultHandler<LoginResponse>()
@@ -116,11 +128,11 @@ class HockeyStreamsComponent
 			{
 				String status = result.getStatus();
 				if ( StringUtils.equals( "Failed", status ) )
-					progressPanelModel.setMessage( "Login Failed" );
+					progressPanelModel.setValue( MESSAGE, "Login Failed" );
 				else if ( StringUtils.equals( "success", result.getStatus() ) )
-					progressPanelModel.setMessage( "Login Succeeded" );
+					progressPanelModel.setValue( MESSAGE, "Login Succeeded" );
 				else
-					progressPanelModel.setMessage( "Unknown Login result: " + result.getStatus() );
+					progressPanelModel.setValue( MESSAGE, "Unknown Login result: " + result.getStatus() );
 					
 			}
 		};
@@ -130,21 +142,21 @@ class HockeyStreamsComponent
                                                                  Executor executor,
                                                                  Vetoer vetoer )
     {
-        return buildActionExecutable( loginActionExecutable, createActionModel( vetoer ), executor );
+        return buildActionExecutable( loginActionExecutable, createActionModel( LOGIN, vetoer ), executor );
     }
 
 	private static ActionExecutable createGetLiveStreamsActionExecutable( ExecutableProcess<GetLiveResponse> getLiveStreamsAction, 
 	                                                                      Executor executor,
 	                                                                      Vetoer vetoer )
 	{
-	    return buildActionExecutable( getLiveStreamsAction, createActionModel( vetoer ), executor );
+	    return buildActionExecutable( getLiveStreamsAction, createActionModel( LIVE_STREAMS, vetoer ), executor );
 	}
 
 	private static ActionExecutable createIpExceptionActionExecutable( ExecutableProcess<IpExceptionResponse> ipExceptionAction, 
 	                                                                   Executor executor,
 	                                                                   Vetoer vetoer )
 	{
-	    return buildActionExecutable( ipExceptionAction, createActionModel( vetoer ), executor );
+	    return buildActionExecutable( ipExceptionAction, createActionModel( IP_EXCEPTION, vetoer ), executor );
 	}
 
 	private static ProcessListener<GetLiveResponse> createGetLiveListener()
@@ -152,16 +164,9 @@ class HockeyStreamsComponent
 		return new ProcessListenerAdapter<GetLiveResponse>()
 		{
 			@Override
-			public void processSucceeded( GetLiveResponse result )
+			public void handleResult( GetLiveResponse result )
 			{
-				ServiioHockeyStreamsConsole.LOGGER.info( "Succeded to get live streams" );
-				ServiioHockeyStreamsConsole.LOGGER.info( "Live Streams: " + result );
-			}
-
-			@Override
-			public void processFailed( Exception exception )
-			{
-				ServiioHockeyStreamsConsole.LOGGER.error( "Failed to get live streams.", exception );
+				LOGGER.info( "Live Streams: " + result );
 			}
 	    };
 	}
@@ -173,49 +178,35 @@ class HockeyStreamsComponent
 			private static final String FAILURE_MESSAGE = "Failed to generate ip exception.";
 			
 			@Override
-			public void processSucceeded( IpExceptionResponse result )
+			public void handleResult( IpExceptionResponse result )
 			{
 				if ( ! "succeeded".equals( result.getStatus() ) )
-					ServiioHockeyStreamsConsole.LOGGER.info( "Ip exception generated successfully." );
+					LOGGER.info( "Ip exception generated successfully." );
 				else
-					ServiioHockeyStreamsConsole.LOGGER.info( FAILURE_MESSAGE ); // TODO: possibly display a message to the user.
-			}
-			
-			@Override
-			public void processFailed( Exception exception )
-			{
-				ServiioHockeyStreamsConsole.LOGGER.error( FAILURE_MESSAGE, exception );
+					LOGGER.info( FAILURE_MESSAGE ); // TODO: possibly display a message to the user.
 			}
 		};
 	}
 
 	private static ProcessListener<LoginResponse> createLoginListener( final HockeyStreamsModel model, 
-			                                                           final Component messageDialogParent )
+			                                                           final java.awt.Component messageDialogParent )
 	{
 		return new ProcessListenerAdapter<LoginResponse>()
 		{
 			@Override
-			public void processSucceeded( LoginResponse result )
+			public void handleResult( LoginResponse result )
 			{
 				if ( "Success".equals( result.getStatus() ) )
 				{
-					ServiioHockeyStreamsConsole.LOGGER.info( "Login Succeeded." );
-					model.setSessionToken( result.getToken() );
+					model.setValue( HockeyStreamsModel.SESSION_TOKEN, result.getToken() );
 				}
 				else
 				{
-					ServiioHockeyStreamsConsole.LOGGER.info( "Login Failed." );
 					JOptionPane.showMessageDialog( messageDialogParent, 
 											       "Login Failed.\n" + result.getMsg(),
 											       "Login Error...", 
 											       JOptionPane.ERROR_MESSAGE );
 				}
-			}
-			
-			@Override
-			public void processFailed( Exception exception )
-			{
-				ServiioHockeyStreamsConsole.LOGGER.error( "Login Failed.", exception );
 			}
 		};
 	}
@@ -256,24 +247,39 @@ class HockeyStreamsComponent
         };
     }
 
-    private static JComponent buildGui( LoginPanelModel loginPanelModel, 
-                                        HockeyStreamsModel hockeyStreamsModel,
-                                        ProgressPanelModel progressPanelModel,
-	                                    ActionExecutable loginActionExecutable, 
-	                                    ActionExecutable ipExceptionActionExecutable,
-	                                    ActionExecutable getLiveStreamsActionExecutable )
+    private static View doBuildView( LoginPanelModel loginPanelModel, 
+    								 HockeyStreamsModel hockeyStreamsModel,
+    								 ProgressPanelModel progressPanelModel,
+    								 ActionExecutable loginActionExecutable, 
+    								 ActionExecutable ipExceptionActionExecutable,
+    								 ActionExecutable getLiveStreamsActionExecutable )
 	{
-		JPanel panel = new JPanel( new BorderLayout() );
+		final JPanel panel = new JPanel( new BorderLayout() );
 		
         Action loginAction = createAction( loginActionExecutable, "Login" );
         Action ipExceptionAction = createAction( ipExceptionActionExecutable, "Generate Ip Exception" );
         Action getLiveStreamsAction = createAction( getLiveStreamsActionExecutable, "Get Live Streams" );
 		
-		panel.add( new LoginPanel( loginPanelModel, loginAction ).getCompnent(), BorderLayout.NORTH );
-		panel.add( new ActionPanel( ipExceptionAction, getLiveStreamsAction ).getComponent(), 
-		           BorderLayout.CENTER );
-		panel.add( new ProgressPanel( progressPanelModel ).getComponent(), BorderLayout.SOUTH );
+		final LoginPanel loginPanel = new LoginPanel( loginPanelModel, loginAction );
+		panel.add( loginPanel.getComponent(), BorderLayout.NORTH );
 		
-		return panel;
+		final ActionPanel actionPanel = new ActionPanel( ipExceptionAction, getLiveStreamsAction );
+		panel.add( actionPanel.getComponent(), BorderLayout.CENTER );
+		
+		final ProgressPanel progressPanel = new ProgressPanel( progressPanelModel );
+		panel.add( progressPanel.getComponent(), BorderLayout.SOUTH );
+		
+		return new ViewBuilder.ViewImpl( new Destroyable()
+		{
+			@Override
+			public void destroy()
+			{
+				panel.removeAll();
+				
+				loginPanel.destroy();
+				actionPanel.destroy();
+				progressPanel.destroy();
+			}
+		}, panel );
 	}
 }

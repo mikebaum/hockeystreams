@@ -2,11 +2,15 @@ package org.mbaum.common.execution;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.google.common.collect.Lists;
 
 
 class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutableProcess<R>
 {
+	private static final Logger LOGGER = Logger.getLogger( ExecutableProcessImpl.class ); 
+	
     private final Process<C, R> mProcess;
     private final C mContext;
     private final ProcessListenerSupport<R> mProcessListeners;
@@ -15,7 +19,7 @@ class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutablePr
     {
         mProcess = process;
         mContext = context;
-        mProcessListeners = new ProcessListenerSupport<R>();
+        mProcessListeners = new ProcessListenerSupport<R>( process.getDescription() );
     }
     
     @Override
@@ -64,10 +68,12 @@ class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutablePr
     {
         private final List<ProcessListener<R>> mListeners = Lists.newArrayList();
         private final Invoker mInvoker;
+		private final String mDescription;
         
-        public ProcessListenerSupport()
+        public ProcessListenerSupport( String description )
         {
-            mInvoker = ProcessUtils.getInvoker();
+            mDescription = description;
+			mInvoker = ProcessUtils.getInvoker();
         }
         
         public void addListener( ProcessListener<R> listener )
@@ -87,8 +93,9 @@ class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutablePr
                 @Override
                 public void run()
                 {
+                	LOGGER.info( "Process [" + mDescription + "] started" );
                     for( ProcessListener<R> listener : Lists.newArrayList( mListeners ) )
-                        listener.processStarted();
+                        listener.handleStarted();
                 }
             } );
         }
@@ -101,7 +108,7 @@ class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutablePr
                 public void run()
                 {
                     for( ProcessListener<R> listener : Lists.newArrayList( mListeners ) )
-                        listener.processSucceeded( result );
+                        listener.handleResult( result );
                 }
             } );
         }
@@ -114,7 +121,7 @@ class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutablePr
                 public void run()
                 {
                     for( ProcessListener<R> listener : Lists.newArrayList( mListeners ) )
-                        listener.processFailed( exception );
+                        listener.handleFailed( exception );
                 }
             } );
         }
@@ -127,7 +134,7 @@ class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutablePr
                 public void run()
                 {
                     for( ProcessListener<R> listener : Lists.newArrayList( mListeners ) )
-                        listener.processFinished();
+                        listener.handleFinished();
                 }
             } );
         }

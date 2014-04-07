@@ -1,6 +1,7 @@
 package org.mbaum.common.execution;
 
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static org.mbaum.common.model.ProgressPanelModel.INDETERMINATE;
+import static org.mbaum.common.model.ProgressPanelModel.MESSAGE;
 
 import java.util.Collection;
 import java.util.List;
@@ -8,11 +9,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.mbaum.common.model.ProgressPanelModel;
-import org.mbaum.common.model.ProgressPanelModelImpl;
 
 public class ProgressPanelExecutor implements ProcessExecutorService
 {
@@ -145,7 +148,7 @@ public class ProgressPanelExecutor implements ProcessExecutorService
 			@Override
 			public void handleResult( R result )
 			{
-				progressPanelModel.setMessage( process.getDescription() + " complete" );
+				progressPanelModel.setValue( MESSAGE, process.getDescription() + " complete" );
 			}
 		};
 	}
@@ -157,34 +160,43 @@ public class ProgressPanelExecutor implements ProcessExecutorService
 		return new ProcessListener<R>()
 		{
 			@Override
-			public void processStarted()
+			public void handleStarted()
 			{
-				progressPanelModel.setMessage( "Performing: " + processDescription );
-				progressPanelModel.setIndeterminant( true );
+				progressPanelModel.setValue( MESSAGE, "Performing: " + processDescription );
+				progressPanelModel.setValue( INDETERMINATE, true );
 			}
 
 			@Override
-			public void processSucceeded( R result )
+			public void handleResult( R result )
 			{
 				resultHander.handleResult( result );
 			}
 
 			@Override
-			public void processFailed( Exception exception )
+			public void handleFailed( Exception exception )
 			{
-				progressPanelModel.setMessage( processDescription + " failed" );
+				progressPanelModel.setValue( MESSAGE, processDescription + " failed" );
 			}
 
 			@Override
-			public void processFinished()
+			public void handleFinished()
 			{
 				progressPanelModel.reset();
 			}
 		};
 	}
 
-	public static ProcessExecutorService createProgressPanelExecutor( ProgressPanelModel progressPanelModel )
+	public static ProcessExecutorService createProgressPanelExecutor( ProgressPanelModel progressPanelModel, 
+																	  final String executorName )
 	{
-		return new ProgressPanelExecutor( progressPanelModel, newFixedThreadPool( 1 ) );
+		ThreadPoolExecutor exector = new ScheduledThreadPoolExecutor( 1, new ThreadFactory()
+		{
+			@Override
+			public Thread newThread( Runnable runnable )
+			{
+				return new Thread( runnable, executorName );
+			}
+		} );
+		return new ProgressPanelExecutor( progressPanelModel, exector );
 	}
 }

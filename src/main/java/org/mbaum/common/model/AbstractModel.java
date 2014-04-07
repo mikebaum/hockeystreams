@@ -1,125 +1,157 @@
 package org.mbaum.common.model;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Iterator;
+import java.util.Map;
 
-import org.mbaum.common.model.ModelValue.Builder;
+import org.mbaum.common.listener.ListenableSupport;
+import org.mbaum.common.listener.Listener;
+import org.mbaum.common.model.Model.ModelValueId;
+import org.mbaum.common.model.MutableModelValue.Builder;
 import org.mbaum.common.value.ValueImpl;
 import org.mbaum.common.value.VolatileValue;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
+import com.google.common.collect.Maps;
 
-public abstract class AbstractModel<M extends Model<M>> implements Model<M>
+public abstract class AbstractModel<I extends ModelValueId<?>, M extends Model<I, M>> implements Model<I, M>
 {
-    private final List<ModelListener<M>> mListeners = Lists.newArrayList();
-    private final List<ModelValue<?>> mModelValues = Lists.newArrayList();
-    private final Notifier mNotifier;
-
+    private final Map<ModelValueId<?>, MutableModelValue<?>> mModelValues = Maps.newIdentityHashMap();
+	private final ListenableSupport<M, Listener<M>> mListenableSupport;
+	
     protected AbstractModel()
     {
-    	mNotifier = createNotifier( this );
-    }
-
-    @Override
-    public void addListener( ModelListener<M> listener )
-    {
-    	mListeners.add( listener );			
+    	mListenableSupport = createListenableSupport();
     }
     
     @Override
-    public void removeListener( ModelListener<M> listener )
+    public void addListener( Listener<M> listener )
     {
-        mListeners.remove( listener );
+    	mListenableSupport.addListener( listener );			
+    }
+    
+    @Override
+    public void removeListener( Listener<M> listener )
+    {
+    	mListenableSupport.removeListener( listener );
+    }
+    
+    @Override
+    public void clearListeners()
+    {
+    	mListenableSupport.clearListeners();
     }
     
     @Override
     public void destroy()
     {
-        mListeners.clear();
+    	mListenableSupport.destroy();
+        
+        for ( MutableModelValue<?> modelValue : mModelValues.values() )
+        	modelValue.clearListeners();
     }
     
     @Override
     public void reset()
     {
-    	mNotifier.pause();
+    	mListenableSupport.pause();
     	
-    	for ( ModelValue<?> modelValue : mModelValues )
+    	for ( MutableModelValue<?> modelValue : mModelValues.values() )
     		modelValue.reset();
     	
-    	mNotifier.resume();
+    	mListenableSupport.resume();
     }
     
-	protected <T> ModelValue<T> newModelValue()
+    @Override
+    public Iterator<MutableModelValue<?>> iterator()
+    {
+        return mModelValues.values().iterator();
+    }
+    
+    @Override
+    public <T> T getValue( ModelValueId<T> id )
+    {
+        return getModelValue( id ).get();
+    }
+    
+    @Override
+    public <T> void setValue( ModelValueId<T> id, T value )
+    {
+    	getModelValue( id ).set( value );   	
+    }
+
+    @Override
+	public <T> MutableModelValue<T> getModelValue( ModelValueId<T> id )
+    {
+	    @SuppressWarnings("unchecked")
+        MutableModelValue<T> modelValue = (MutableModelValue<T>) mModelValues.get( id );
+    	Preconditions.checkArgument( modelValue != null, "There is no model value for the id: " + id );
+	    return modelValue;
+    }
+    
+    protected abstract ListenableSupport<M, Listener<M>> createListenableSupport();
+    
+	protected <T> MutableModelValue<T> newModelValue( I id, T defaultValue, String description, M model )
 	{
-		return createModelValueBuilder( (T) null ).setNotifier( mNotifier )
-				                                  .build();
+		@SuppressWarnings("unchecked")
+        ModelValueId<T> modelValueId = (ModelValueId<T>) id;
+		return createModelValueBuilder( defaultValue, description, model, modelValueId ).setCurrentValue( new ValueImpl<T>( defaultValue ) )
+																						.build();
 	}
 	
-	protected <T> ModelValue<T> newModelValue( T defaultValue )
+	protected <T> MutableModelValue<T> newVolatileModelValue( I id,
+	                                                          T defaultValue, 
+	                                                          String description, 
+	                                                          M model )
 	{
-		return createModelValueBuilder( defaultValue ).setNotifier( mNotifier )
-				      								  .setCurrentValue( new ValueImpl<T>( defaultValue ) )
-				      								  .build();
-	}
-	
-	protected <T> ModelValue<T> newVolatileModelValue( T defaultValue )
-	{
-		return createModelValueBuilder( defaultValue ).setNotifier( mNotifier )
-												      .setCurrentValue( new VolatileValue<T>( defaultValue ) )
-												      .build();
+		@SuppressWarnings("unchecked")
+        ModelValueId<T> modelValueId = (ModelValueId<T>) id;
+		return createModelValueBuilder( defaultValue, description, model, modelValueId ).setCurrentValue( new VolatileValue<T>( defaultValue ) )
+																			  			.build();
 	}
     
-	private <T> Builder<T> createModelValueBuilder( final T defaultValue )
+	private <T> Builder<T> createModelValueBuilder( T defaultValue, 
+	                                                String description, 
+	                                                final M model, 
+	                                                final ModelValueId<T> id )
     {
-		return new Builder<T>()
+		return new Builder<T>( description, defaultValue )
 	    {
 			@Override
-			public ModelValue<T> build()
+			public MutableModelValue<T> build()
 			{
-				setDefaultValue( defaultValue );
-				ModelValue<T> modelValue = super.build();
-				mModelValues.add( modelValue );
+				MutableModelValue<T> modelValue = super.build();
+				Listener<T> listener = createModelValueListener( mListenableSupport, model );
+				modelValue.addListener( listener );
+				mModelValues.put( id, modelValue );
 				return modelValue;
 			}
 		};
     }
 	
-    private void notifyListeners( M model )
+	private static <I extends ModelValueId<?>, T, M extends Model<I, M>> Listener<T> 
+		createModelValueListener( final ListenableSupport<M, Listener<M>> listenerSupport, final M model )
     {
-        for( ModelListener<M> listener : Lists.newArrayList( mListeners ) )
-            listener.modelChanged( model );
+        return new Listener<T>()
+		{
+			@Override
+            public void handleChanged( T newValue )
+            {
+				listenerSupport.notifyListeners();
+            }
+		};
     }
-    
-    private static <M extends Model<M>, A extends AbstractModel<M> & Model<M>> Notifier createNotifier( final A model )
-    {
-    	return new Notifier()
-    	{
-    		private boolean mPaused = false;
-    		private final AtomicBoolean mUnsentNotifications = new AtomicBoolean( false );
-    		
+	
+	protected static <I extends ModelValueId<?>, M extends Model<I, M>> ListenableSupport<M, Listener<M>> 
+		createModelListenerSupport( final M model )
+	{
+		return ListenableSupport.createListenableSupport( new Supplier<M>()
+		{
 			@Override
-            public void notifyListeners()
+            public M get()
             {
-				if ( ! mPaused )
-					model.notifyListeners( (M) model );
-				else
-					mUnsentNotifications.set( true );
+				return model;
             }
-
-			@Override
-            public void pause()
-            {
-	            mPaused = true;
-            }
-
-			@Override
-            public void resume()
-            {
-				mPaused = false;
-
-				if ( mUnsentNotifications.compareAndSet( true, false ) )
-	            	notifyListeners();
-            }
-    	};
-    }
+		} );
+	}
 }

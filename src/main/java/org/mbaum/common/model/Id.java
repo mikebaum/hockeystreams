@@ -1,3 +1,6 @@
 package org.mbaum.common.model;
 
-public interface Listener {}
+public interface Id<T>
+{
+
+}

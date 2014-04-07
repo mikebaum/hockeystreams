@@ -26,4 +26,10 @@ public class VolatileValue<T> implements Value<T>
 		mValue = value;
 		return true;
     }
+	
+	@Override
+	public boolean isEmpty()
+	{
+	    return mValue == null;
+	}
 }

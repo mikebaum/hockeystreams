@@ -1,39 +1,42 @@
 package org.mbaum.common.model;
 
+import org.mbaum.common.listener.ListenableSupport;
+import org.mbaum.common.listener.Listener;
 
-public class ProgressPanelModelImpl extends AbstractModel<ProgressPanelModel> implements ProgressPanelModel
+
+public class ProgressPanelModelImpl extends AbstractModel<ProgressPanelModel.Id<?>, ProgressPanelModel> implements ProgressPanelModel
 {
 	private static boolean DEFAULT_INDETERMINANT = false;
 	private static String DEFAULT_MESSAGE = "";
 	
-	private final ModelValue<String> mMessage;
-	private final ModelValue<Boolean> mIndeterminant;
-	
 	public ProgressPanelModelImpl()
     {
-		mMessage = newModelValue( DEFAULT_MESSAGE );
-		mIndeterminant = newModelValue( DEFAULT_INDETERMINANT );
+		super();
+		newModelValue( MESSAGE, DEFAULT_MESSAGE, "Message", this );
+		newModelValue( INDETERMINATE, DEFAULT_INDETERMINANT, "Indeterminate", this );
     }
 	
-	public String getMessage()
+	@Override
+	public <T> MutableModelValue<T> getModelValue( Id<T> id )
 	{
-		return mMessage.get();
+	    return super.getModelValue( id );
 	}
 	
 	@Override
-    public void setMessage( String message )
+	public <T> T getValue( Id<T> id )
 	{
-		mMessage.set( message );
-	}
-	
-	public boolean isIndeterminant()
-	{
-		return mIndeterminant.get();
+	    return getModelValue( id ).get();
 	}
 	
 	@Override
-    public void setIndeterminant( boolean indeterminant )
+	public <T> void setValue( Id<T> id, T value )
 	{
-		mIndeterminant.set( indeterminant );
+		getModelValue( id ).set( value );
 	}
+	
+	@Override
+    protected ListenableSupport<ProgressPanelModel, Listener<ProgressPanelModel>> createListenableSupport()
+    {
+	    return createModelListenerSupport( (ProgressPanelModel) this );
+    }
 }

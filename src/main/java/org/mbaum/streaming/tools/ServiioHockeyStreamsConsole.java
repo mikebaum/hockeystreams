@@ -1,12 +1,17 @@
-package org.mbaum.hockeystreams;
+package org.mbaum.streaming.tools;
 
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
+import org.mbaum.hockeystreams.HockeyStreamsComponent;
 import org.mbaum.serviio.ServiioComponent;
 
 public class ServiioHockeyStreamsConsole
@@ -26,9 +31,24 @@ public class ServiioHockeyStreamsConsole
         mHockeyStremsComponent = new HockeyStreamsComponent( mFrame );
         mServiioComponent = new ServiioComponent( mFrame );
         
+        mFrame.addWindowListener( createOnCloseListener() );
+        
         buildAndShowConsole( mFrame, mConsoleTabbedPane, mHockeyStremsComponent, mServiioComponent );
 	}
     
+	private WindowListener createOnCloseListener()
+    {
+		return new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( WindowEvent e )
+			{
+				mHockeyStremsComponent.destroy();
+				mServiioComponent.destroy();
+			}
+		};
+    }
+
 	private static void buildAndShowConsole( JFrame frame, 
 											 JTabbedPane consoleTabbedPane, 
 											 HockeyStreamsComponent hockeyStreamsComponent, 
@@ -46,11 +66,15 @@ public class ServiioHockeyStreamsConsole
 	{
 	    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 	    
-	    consoleTabbedPane.addTab( "HockeyStreams", hockeyStreamsComponent.getComponent() );
-	    consoleTabbedPane.addTab( "Serviio", serviioComponent.getComponent() );
+	    JComponent hockeyStreamsView = hockeyStreamsComponent.getView().getComponent();
+		consoleTabbedPane.addTab( "HockeyStreams", hockeyStreamsView );
+		
+	    JComponent serviioView = serviioComponent.getView().getComponent();
+		consoleTabbedPane.addTab( "Serviio", serviioView );
 	    
 	    frame.setContentPane( consoleTabbedPane );
-	    frame.setMinimumSize( new Dimension( hockeyStreamsComponent.getComponent().getPreferredSize().width,
+	    frame.setMinimumSize( new Dimension( Math.max( hockeyStreamsView.getPreferredSize().width, 
+	                                                   serviioView.getPreferredSize().width ),
 	                                         CONSOLE_MIN_HEIGHT ) );
 	}
 	

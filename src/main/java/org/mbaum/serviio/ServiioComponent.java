@@ -5,30 +5,38 @@ import static org.mbaum.common.action.ActionUtils.createAction;
 import static org.mbaum.common.action.ActionUtils.createActionModel;
 import static org.mbaum.common.execution.ProgressPanelExecutor.createProgressPanelExecutor;
 import static org.mbaum.common.veto.Vetoers.createVetoer;
+import static org.mbaum.serviio.model.ServiioModel.HOST_NAME;
+import static org.mbaum.serviio.model.ServiioModel.PORT;
+import static org.mbaum.serviio.model.ServiioModel.REPOSITORY_RESPONSE;
 import static org.mbaum.serviio.net.ServiioApiActions.ACTION_PROCESS;
 import static org.mbaum.serviio.net.ServiioApiActions.PING_PROCESS;
 import static org.mbaum.serviio.net.ServiioApiActions.REPOSITORY_PROCESS;
 import static org.mbaum.serviio.net.ServiioApiActions.UPDATE_REPOSITORY_PROCESS;
 
 import java.awt.BorderLayout;
+import java.util.LinkedList;
 
 import javax.swing.Action;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
+import org.mbaum.common.Component;
+import org.mbaum.common.Destroyable;
 import org.mbaum.common.action.ActionExecutable;
 import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessExecutorService;
 import org.mbaum.common.execution.ProcessListener;
-import org.mbaum.common.execution.ProcessListener.ProcessListenerAdapter;
+import org.mbaum.common.execution.ProcessListenerAdapter;
 import org.mbaum.common.model.ModelValidator;
 import org.mbaum.common.model.ProgressPanelModelImpl;
 import org.mbaum.common.view.ActionPanel;
+import org.mbaum.common.view.View;
+import org.mbaum.common.view.ViewBuilder;
 import org.mbaum.serviio.model.ServiioModel;
+import org.mbaum.serviio.model.ServiioModelImpl;
 import org.mbaum.serviio.net.ActionContext;
 import org.mbaum.serviio.net.ServiioApiActions.PingContext;
 import org.mbaum.serviio.net.ServiioApiActions.RepositoryContext;
@@ -39,12 +47,16 @@ import org.mbaum.serviio.view.ServiioPanel;
 
 import com.google.common.collect.Lists;
 
-public class ServiioComponent
+public class ServiioComponent implements Component
 {
+	private static final String PING = "PING";
+	private static final String UPDATE_REPOSITORY = "UPDATE_REPOSITORY";
+	private static final String GET_REPOSITORY = "GET_REPOSITORY";
+
 	private static final Logger LOGGER = Logger.getLogger( ServiioComponent.class );
 	
 	private final ServiioModel mServiioModel;
-	private final JComponent mComponent;
+	private final View mView;
 	private final JFrame mFrame;
 	private final ExecutableProcess<PingResponse> mPingAction;
 	private final ExecutableProcess<RepositoryResponse> mRepositoryProcess;
@@ -56,50 +68,69 @@ public class ServiioComponent
 	private final ActionExecutable mUpdateRepositoryActionExecutable;
 
 	private final ExecutableProcess<PingResponse> mRefreshRepoActionExecutable;
+	
+	private final LinkedList<Destroyable> mDestroyables = Lists.newLinkedList();
 
 	public ServiioComponent( JFrame frame )
 	{
 		mFrame = frame;
-		mServiioModel = new ServiioModel();
-		mProgressPanelModel = new ProgressPanelModelImpl();
-		mServiioProcessExecutor = createProgressPanelExecutor( mProgressPanelModel );
+		mServiioModel = d( new ServiioModelImpl() );
+		mProgressPanelModel = d( new ProgressPanelModelImpl() );
+		mServiioProcessExecutor = createProgressPanelExecutor( mProgressPanelModel, "ServiioRESTApiExecutor" );
 
 		mPingAction = mServiioProcessExecutor.buildExecutableProcess( PING_PROCESS, 
 		                                                              createPingContext( mServiioModel ), 
 		                                                              createPingProcessListener() );
 		
-		mPingActionExecutable = buildActionExecutable( mPingAction, 
-													   createActionModel( createVetoer( mServiioModel, 
-															                            createServiioModelValidator() ) ),
-						                               mServiioProcessExecutor );
+		mPingActionExecutable = d( buildActionExecutable( mPingAction, 
+								        				  createActionModel( PING, 
+										    			                     createVetoer( mServiioModel, 
+											    		                                   createServiioModelValidator() ) ),
+						                                  mServiioProcessExecutor ) );
 		
 		mRepositoryProcess = mServiioProcessExecutor.buildExecutableProcess( REPOSITORY_PROCESS, 
 																			 createRepositoryContext( mServiioModel ), 
 																			 createRepositoryProcessListener( mServiioModel ) );
 
 		
-		mRepositoryActionExecutable = buildActionExecutable( mRepositoryProcess, 
-				   											 createActionModel( createVetoer( mServiioModel, 
-				   													 						  createServiioModelValidator() ) ),
-				   										     mServiioProcessExecutor );
+		mRepositoryActionExecutable = d( buildActionExecutable( mRepositoryProcess, 
+				   						        				createActionModel( GET_REPOSITORY, 
+				   								    			                   createVetoer( mServiioModel, 
+				   												    	 						 createServiioModelValidator() ) ),
+				   										        mServiioProcessExecutor ) );
 		
 		mRefreshRepoActionExecutable = mServiioProcessExecutor.buildExecutableProcess( ACTION_PROCESS, 
 																					   createActionContext( mServiioModel ), 
 																					   createPingProcessListener() );
 		
 		mUpdateRepositoryProcess = mServiioProcessExecutor.buildExecutableProcess( UPDATE_REPOSITORY_PROCESS, 
-				 																   createRepositoryContext( mServiioModel ), 
-				 																   createUpdateRepositoryProcessListener( mRefreshRepoActionExecutable ) );
+		                                                                           createRepositoryContext( mServiioModel ), 
+		                                                                           createUpdateRepositoryProcessListener( mRefreshRepoActionExecutable ) );
 
 
-		mUpdateRepositoryActionExecutable = buildActionExecutable( mUpdateRepositoryProcess, 
-																   createActionModel( createVetoer( mServiioModel, 
-																		   							createServiioModelValidator() ) ),
-																   mServiioProcessExecutor );
+		mUpdateRepositoryActionExecutable = d( buildActionExecutable( mUpdateRepositoryProcess, 
+		                                                              createActionModel( UPDATE_REPOSITORY, 
+		                                                                                 createVetoer( mServiioModel, 
+		                                                                                               createServiioModelValidator() ) ),
+		                                                                                 mServiioProcessExecutor ) );
 		
-        mComponent = buildGui( mServiioModel, mPingActionExecutable, mRepositoryActionExecutable, mUpdateRepositoryActionExecutable );
+        mView = d( buildView( mServiioModel, mPingActionExecutable, mRepositoryActionExecutable, mUpdateRepositoryActionExecutable ) );
 	}
-
+	
+	@Override
+	public void destroy()
+	{
+		LOGGER.debug( "destroying" );
+		for ( Destroyable destroyable : mDestroyables )
+			destroyable.destroy();
+	}
+	
+	private <D extends Destroyable> D d( D destroyable )
+	{
+		mDestroyables.addFirst( destroyable );
+		return destroyable;
+	}
+	
 	private ActionContext createActionContext( ServiioModel serviioModel )
     {
 //		List<OnlineRepository> onlineRepositories = serviioModel.getRepositoryResponse().getOnlineRepositories();
@@ -109,19 +140,14 @@ public class ServiioComponent
 	    return new ActionContext( new ServiioAction( "forceOnlineResourceRefresh", Lists.newArrayList( "39" ) ), serviioModel );
     }
 
-	public JComponent getComponent()
-	{
-		return mComponent;
-	}
-
 	private static ProcessListener<PingResponse> createPingProcessListener()
 	{
 		return new ProcessListenerAdapter<PingResponse>()
 		{
 			@Override
-			public void processSucceeded( PingResponse result )
+			public void handleResult( PingResponse result )
 			{
-				super.processSucceeded( result );
+				super.handleResult( result );
 			}			
 		};
 	}
@@ -143,14 +169,14 @@ public class ServiioComponent
 		return new ProcessListenerAdapter<RepositoryResponse>()
 		{
 			@Override
-			public void processSucceeded( RepositoryResponse result )
+			public void handleResult( RepositoryResponse result )
 			{
 				LOGGER.info( "repository: " + result );
-				model.setRepositoryResponse( result );
+				model.setValue( REPOSITORY_RESPONSE, result );
 			}
 			
 			@Override
-			public void processFailed( Exception exception )
+			public void handleFailed( Exception exception )
 			{
 				LOGGER.error( "Failed to get repositories", exception );
 			}
@@ -162,16 +188,10 @@ public class ServiioComponent
 		return new ProcessListenerAdapter<PingResponse>()
 		{
 			@Override
-			public void processSucceeded( PingResponse result )
+			public void handleResult( PingResponse result )
 			{
 				LOGGER.info( " update repository: " + result );
 				//refreshRepoExecutable.execute();
-			}
-			
-			@Override
-			public void processFailed( Exception exception )
-			{
-				LOGGER.error( "Failed to get repositories", exception );
 			}
 		};
 	}
@@ -188,12 +208,12 @@ public class ServiioComponent
 		};
 	}
 
-	private static JComponent buildGui( ServiioModel serviioModel, 
-									    ActionExecutable pingActionExecutable,
-									    ActionExecutable repositoryActionExecutable, 
-									    ActionExecutable updateRepositoryActionExecutable )
+	private static View buildView( ServiioModel serviioModel, 
+									     ActionExecutable pingActionExecutable,
+									     ActionExecutable repositoryActionExecutable, 
+									     ActionExecutable updateRepositoryActionExecutable )
 	{
-		JPanel serviioPanel = new JPanel( new BorderLayout() );
+		final JPanel serviioPanel = new JPanel( new BorderLayout() );
 		
 		Action pingAction = createAction( pingActionExecutable, "Ping" );
 		Action repositoryAction = createAction( repositoryActionExecutable, "Repository" );
@@ -203,7 +223,14 @@ public class ServiioComponent
 		serviioPanel.add( new ServiioPanel( serviioModel ).getComponent(), BorderLayout.NORTH );
 		serviioPanel.add( new ActionPanel( pingAction, repositoryAction, updateRepositoryAction ).getComponent(), BorderLayout.CENTER );
 
-		return serviioPanel;
+		return new ViewBuilder.ViewImpl( new Destroyable()
+		{
+			@Override
+			public void destroy()
+			{
+				serviioPanel.removeAll();
+			}
+		}, serviioPanel );
 	}
 
 	private static ModelValidator<ServiioModel> createServiioModelValidator()
@@ -213,14 +240,22 @@ public class ServiioComponent
             @Override
             public boolean isValid( ServiioModel model )
             {
-                if ( StringUtils.isBlank( model.getHostName() ) )
+                if ( StringUtils.isBlank( model.getValue( HOST_NAME ) ) )
                     return false;
                 
-                if ( StringUtils.isBlank( model.getPort() ) )
+                String port = model.getValue( PORT );
+                
+				if ( StringUtils.isBlank( port ) )
                     return false;
                 
-                return NumberUtils.isNumber( model.getPort() );
+                return NumberUtils.isNumber( port );
             }
         };
 	}
+
+	@Override
+    public View getView()
+    {
+	    return mView;
+    }
 }

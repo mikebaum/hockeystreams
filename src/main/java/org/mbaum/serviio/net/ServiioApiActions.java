@@ -1,6 +1,9 @@
 package org.mbaum.serviio.net;
 
 import static org.mbaum.common.net.parse.Parsers.newJsonParser;
+import static org.mbaum.serviio.model.ServiioModel.HOST_NAME;
+import static org.mbaum.serviio.model.ServiioModel.PORT;
+import static org.mbaum.serviio.model.ServiioModel.REPOSITORY_RESPONSE;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -95,7 +98,7 @@ public final class ServiioApiActions
 			protected HttpUriRequest buildRequest( RepositoryContext context )
 					throws Exception
 			{
-				RepositoryResponse repositoryResponse = context.getServiioModel().getRepositoryResponse();
+				RepositoryResponse repositoryResponse = context.getServiioModel().getValue( REPOSITORY_RESPONSE );
 				
 				List<OnlineRepository> onlineRepositories = repositoryResponse.getOnlineRepositories();
 				onlineRepositories.remove( 0 );
@@ -121,8 +124,7 @@ public final class ServiioApiActions
 		ServiioModel getServiioModel();
 	}
 	
-	private static HttpUriRequest buildGetRequest( ServiioModel serviioModel, 
-												   String path )
+	private static HttpUriRequest buildGetRequest( ServiioModel serviioModel, String path )
 			throws URISyntaxException
 	{
 		return RequestBuilder.get().setUri( buildUri( serviioModel, path ) )
@@ -157,8 +159,8 @@ public final class ServiioApiActions
 	private static URI buildUri( ServiioModel serviioModel, String path )
 			throws URISyntaxException
 	{
-		return new URIBuilder().setHost( serviioModel.getHostName() )
-		                		  .setPort( Integer.parseInt( serviioModel.getPort() ) )
+		return new URIBuilder().setHost( serviioModel.getValue( HOST_NAME ) )
+		                		  .setPort( Integer.parseInt( serviioModel.getValue( PORT ) ) )
 		                		  .setScheme( "http" )
 		                		  .setPath( path )
 		                		  .build();
