@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -14,27 +15,34 @@ import org.apache.log4j.Logger;
 import org.mbaum.hockeystreams.HockeyStreamsComponent;
 import org.mbaum.serviio.ServiioComponent;
 
+import com.apple.eawt.AppEvent.QuitEvent;
+import com.apple.eawt.Application;
+import com.apple.eawt.QuitHandler;
+import com.apple.eawt.QuitResponse;
+
 public class ServiioHockeyStreamsConsole
 {
 	static final Logger LOGGER = Logger.getLogger( ServiioHockeyStreamsConsole.class );
 	private static final int CONSOLE_MIN_HEIGHT = 120;
-
-	private final JFrame mFrame;
-	private final HockeyStreamsComponent mHockeyStremsComponent;
-	private final JTabbedPane mConsoleTabbedPane;
-	private final ServiioComponent mServiioComponent;
+    private final HockeyStreamsComponent mHockeyStreamsComponent;
+    private final ServiioComponent mServiioComponent;
 
     public ServiioHockeyStreamsConsole()
 	{
-    	mFrame = new JFrame( "Serviio HockeyStreams Console" );
-    	mConsoleTabbedPane = new JTabbedPane();
-        mHockeyStremsComponent = new HockeyStreamsComponent( mFrame );
-        mServiioComponent = new ServiioComponent( mFrame );
+        JFrame frame = new JFrame( "Serviio HockeyStreams Console" );
+        mHockeyStreamsComponent = new HockeyStreamsComponent( frame );
+        mServiioComponent = new ServiioComponent( frame );
         
-        mFrame.addWindowListener( createOnCloseListener() );
+        frame.addWindowListener( createOnCloseListener() );
         
-        buildAndShowConsole( mFrame, mConsoleTabbedPane, mHockeyStremsComponent, mServiioComponent );
+        buildAndShowConsole( frame, mHockeyStreamsComponent, mServiioComponent );
 	}
+    
+    public void destroy()
+    {
+        mServiioComponent.destroy();
+        mHockeyStreamsComponent.destroy();
+    }
     
 	private WindowListener createOnCloseListener()
     {
@@ -43,27 +51,25 @@ public class ServiioHockeyStreamsConsole
 			@Override
 			public void windowClosing( WindowEvent e )
 			{
-				mHockeyStremsComponent.destroy();
-				mServiioComponent.destroy();
+			    destroy();
 			}
 		};
     }
 
 	private static void buildAndShowConsole( JFrame frame, 
-											 JTabbedPane consoleTabbedPane, 
 											 HockeyStreamsComponent hockeyStreamsComponent, 
 											 ServiioComponent serviioComponent )
     {
-	    initGui( frame, consoleTabbedPane, hockeyStreamsComponent, serviioComponent );
+	    initGui( frame, hockeyStreamsComponent, serviioComponent );
 	    frame.pack();
 	    frame.setVisible( true );
     }
 
 	private static void initGui( JFrame frame, 
-							     JTabbedPane consoleTabbedPane, 
 							     HockeyStreamsComponent hockeyStreamsComponent, 
 							     ServiioComponent serviioComponent )
 	{
+	    JTabbedPane consoleTabbedPane = new JTabbedPane();
 	    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 	    
 	    JComponent hockeyStreamsView = hockeyStreamsComponent.getView().getComponent();
@@ -78,6 +84,31 @@ public class ServiioHockeyStreamsConsole
 	                                         CONSOLE_MIN_HEIGHT ) );
 	}
 	
+	public static ServiioHockeyStreamsConsole buildConsole()
+	{
+	    final AtomicReference<ServiioHockeyStreamsConsole> console = 
+	        new AtomicReference<ServiioHockeyStreamsConsole>();
+	    
+	    try
+        {
+	        
+            SwingUtilities.invokeAndWait( new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    console.set( new ServiioHockeyStreamsConsole() );
+                }
+            } );
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+	    
+	    return console.get();
+	}
+	
 	public static void main( String[] args )
 	{
 		SwingUtilities.invokeLater( new Runnable()
@@ -85,7 +116,18 @@ public class ServiioHockeyStreamsConsole
 			@Override
 			public void run()
 			{
-			    new ServiioHockeyStreamsConsole();
+			    final ServiioHockeyStreamsConsole console = 
+			        new ServiioHockeyStreamsConsole();
+			    
+	              Application.getApplication().setQuitHandler( new QuitHandler()
+                  {
+                      @Override
+                      public void handleQuitRequestWith( QuitEvent arg0, QuitResponse arg1 )
+                      {
+                          console.destroy();
+                          System.exit( 0 );
+                      }
+                  } );
 			}
 		} );
 	}

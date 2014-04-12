@@ -23,6 +23,12 @@ class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutablePr
     }
     
     @Override
+    public void destroy()
+    {
+        mProcessListeners.destroy();
+    }
+    
+    @Override
     public void execute()
     {
         mProcessListeners.fireProcessStared();
@@ -74,6 +80,11 @@ class ExecutableProcessImpl<C extends ProcessContext, R> implements ExecutablePr
         {
             mDescription = description;
 			mInvoker = ProcessUtils.getInvoker();
+        }
+        
+        public void destroy()
+        {
+            mListeners.clear();
         }
         
         public void addListener( ProcessListener<R> listener )

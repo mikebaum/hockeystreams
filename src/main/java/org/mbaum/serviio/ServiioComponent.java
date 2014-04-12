@@ -14,7 +14,6 @@ import static org.mbaum.serviio.net.ServiioApiActions.REPOSITORY_PROCESS;
 import static org.mbaum.serviio.net.ServiioApiActions.UPDATE_REPOSITORY_PROCESS;
 
 import java.awt.BorderLayout;
-import java.util.LinkedList;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
@@ -35,6 +34,7 @@ import org.mbaum.common.model.ProgressPanelModelImpl;
 import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.View;
 import org.mbaum.common.view.ViewBuilder;
+import org.mbaum.hockeystreams.AbstractComponent;
 import org.mbaum.serviio.model.ServiioModel;
 import org.mbaum.serviio.model.ServiioModelImpl;
 import org.mbaum.serviio.net.ActionContext;
@@ -47,7 +47,7 @@ import org.mbaum.serviio.view.ServiioPanel;
 
 import com.google.common.collect.Lists;
 
-public class ServiioComponent implements Component
+public class ServiioComponent extends AbstractComponent implements Component
 {
 	private static final String PING = "PING";
 	private static final String UPDATE_REPOSITORY = "UPDATE_REPOSITORY";
@@ -69,8 +69,6 @@ public class ServiioComponent implements Component
 
 	private final ExecutableProcess<PingResponse> mRefreshRepoActionExecutable;
 	
-	private final LinkedList<Destroyable> mDestroyables = Lists.newLinkedList();
-
 	public ServiioComponent( JFrame frame )
 	{
 		mFrame = frame;
@@ -78,9 +76,9 @@ public class ServiioComponent implements Component
 		mProgressPanelModel = d( new ProgressPanelModelImpl() );
 		mServiioProcessExecutor = createProgressPanelExecutor( mProgressPanelModel, "ServiioRESTApiExecutor" );
 
-		mPingAction = mServiioProcessExecutor.buildExecutableProcess( PING_PROCESS, 
-		                                                              createPingContext( mServiioModel ), 
-		                                                              createPingProcessListener() );
+		mPingAction = d( mServiioProcessExecutor.buildExecutableProcess( PING_PROCESS, 
+		                                                                 createPingContext( mServiioModel ), 
+		                                                                 createPingProcessListener() ) );
 		
 		mPingActionExecutable = d( buildActionExecutable( mPingAction, 
 								        				  createActionModel( PING, 
@@ -88,9 +86,9 @@ public class ServiioComponent implements Component
 											    		                                   createServiioModelValidator() ) ),
 						                                  mServiioProcessExecutor ) );
 		
-		mRepositoryProcess = mServiioProcessExecutor.buildExecutableProcess( REPOSITORY_PROCESS, 
-																			 createRepositoryContext( mServiioModel ), 
-																			 createRepositoryProcessListener( mServiioModel ) );
+		mRepositoryProcess = d( mServiioProcessExecutor.buildExecutableProcess( REPOSITORY_PROCESS, 
+																			    createRepositoryContext( mServiioModel ), 
+																			    createRepositoryProcessListener( mServiioModel ) ) );
 
 		
 		mRepositoryActionExecutable = d( buildActionExecutable( mRepositoryProcess, 
@@ -99,13 +97,14 @@ public class ServiioComponent implements Component
 				   												    	 						 createServiioModelValidator() ) ),
 				   										        mServiioProcessExecutor ) );
 		
-		mRefreshRepoActionExecutable = mServiioProcessExecutor.buildExecutableProcess( ACTION_PROCESS, 
-																					   createActionContext( mServiioModel ), 
-																					   createPingProcessListener() );
+		mRefreshRepoActionExecutable = d( mServiioProcessExecutor.buildExecutableProcess( ACTION_PROCESS, 
+																					      createActionContext( mServiioModel ), 
+																					      createPingProcessListener() ) );
 		
-		mUpdateRepositoryProcess = mServiioProcessExecutor.buildExecutableProcess( UPDATE_REPOSITORY_PROCESS, 
-		                                                                           createRepositoryContext( mServiioModel ), 
-		                                                                           createUpdateRepositoryProcessListener( mRefreshRepoActionExecutable ) );
+		mUpdateRepositoryProcess = 
+		    d( mServiioProcessExecutor.buildExecutableProcess( UPDATE_REPOSITORY_PROCESS, 
+		                                                       createRepositoryContext( mServiioModel ), 
+		                                                       createUpdateRepositoryProcessListener( mRefreshRepoActionExecutable ) ) );
 
 
 		mUpdateRepositoryActionExecutable = d( buildActionExecutable( mUpdateRepositoryProcess, 
@@ -115,20 +114,6 @@ public class ServiioComponent implements Component
 		                                                                                 mServiioProcessExecutor ) );
 		
         mView = d( buildView( mServiioModel, mPingActionExecutable, mRepositoryActionExecutable, mUpdateRepositoryActionExecutable ) );
-	}
-	
-	@Override
-	public void destroy()
-	{
-		LOGGER.debug( "destroying" );
-		for ( Destroyable destroyable : mDestroyables )
-			destroyable.destroy();
-	}
-	
-	private <D extends Destroyable> D d( D destroyable )
-	{
-		mDestroyables.addFirst( destroyable );
-		return destroyable;
 	}
 	
 	private ActionContext createActionContext( ServiioModel serviioModel )

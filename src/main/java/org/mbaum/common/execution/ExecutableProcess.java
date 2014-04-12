@@ -1,6 +1,8 @@
 package org.mbaum.common.execution;
 
-public interface ExecutableProcess<R>
+import org.mbaum.common.Destroyable;
+
+public interface ExecutableProcess<R> extends Destroyable
 {
     void execute();
     

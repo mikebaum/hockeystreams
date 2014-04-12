@@ -15,17 +15,40 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.log4j.Logger;
 import org.mbaum.common.model.ProgressPanelModel;
 
 public class ProgressPanelExecutor implements ProcessExecutorService
 {
-	private final ProgressPanelModel mProgressPanelModel;
+    private static final Logger LOGGER = Logger.getLogger( ProgressPanelExecutor.class );
+	
+    private final ProgressPanelModel mProgressPanelModel;
 	private final ExecutorService mExecutorService;
+    private final String mExecutorName;
 
-	private ProgressPanelExecutor( ProgressPanelModel progressPanelModel, ExecutorService executorService )
+	private ProgressPanelExecutor( ProgressPanelModel progressPanelModel, ExecutorService executorService, String executorName )
 	{
 		mProgressPanelModel = progressPanelModel;
 		mExecutorService = executorService;
+        mExecutorName = executorName;
+        LOGGER.info( "Created executor thread: " + mExecutorName );
+	}
+	
+	@Override
+	public void destroy()
+	{
+	    LOGGER.info( "Shutting down executor thread: " + mExecutorName );
+	    mExecutorService.shutdown();
+	    
+	    try
+        {
+	        LOGGER.info( mExecutorName + " waiting for processes to finish." );
+	        mExecutorService.awaitTermination( 5, TimeUnit.SECONDS );
+        }
+        catch ( InterruptedException e )
+        {
+            LOGGER.error( "Failed to shutdown executor: " + mExecutorName, e );
+        }
 	}
 
 	@Override
@@ -197,6 +220,6 @@ public class ProgressPanelExecutor implements ProcessExecutorService
 				return new Thread( runnable, executorName );
 			}
 		} );
-		return new ProgressPanelExecutor( progressPanelModel, exector );
+		return new ProgressPanelExecutor( progressPanelModel, exector, executorName );
 	}
 }

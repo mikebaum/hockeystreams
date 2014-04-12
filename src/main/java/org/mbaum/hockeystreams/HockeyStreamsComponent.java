@@ -55,8 +55,7 @@ public class HockeyStreamsComponent extends AbstractComponent implements Compone
 	private static final String LOGIN = "LOGIN";
 	private static final String IP_EXCEPTION = "IP_EXCEPTION";
 	private static final String LIVE_STREAMS = "LIVE_STREAMS";
-
-	static final Logger LOGGER = Logger.getLogger( HockeyStreamsComponent.class );
+	private static final Logger LOGGER = Logger.getLogger( HockeyStreamsComponent.class );
 	
 	private final LoginPanelModel mLoginPanelModel;
     private final HockeyStreamsModel mHockeyStreamsModel;
@@ -75,21 +74,21 @@ public class HockeyStreamsComponent extends AbstractComponent implements Compone
 		mLoginPanelModel = d( new LoginPanelModelImpl() );
 		mHockeyStreamsModel = d( new HockeyStreamsModelImpl() );
 		mProgressPanelModel = d( new ProgressPanelModelImpl() );
-		mHockeyStreamsExecutor = createProgressPanelExecutor( mProgressPanelModel, "HockeyStreamsRESTApiExecutor" );
+		mHockeyStreamsExecutor = d( createProgressPanelExecutor( mProgressPanelModel, "HockeyStreamsRESTApiExecutor" ) );
 		
         mLoginProcess = 
-        		mHockeyStreamsExecutor.buildExecutableProcess( LOGIN_PROCESS,
-                                     						   createLoginContext( mLoginPanelModel ),
-                                     				           createLoginListener( mHockeyStreamsModel, parent ),
-                                     				           createLoginResultHandler( mProgressPanelModel ) );
+        		d( mHockeyStreamsExecutor.buildExecutableProcess( LOGIN_PROCESS,
+                                        						  createLoginContext( mLoginPanelModel ),
+                                     				              createLoginListener( mHockeyStreamsModel, parent ),
+                                     				              createLoginResultHandler( mProgressPanelModel ) ) );
         mIpExceptionProcess = 
-        		mHockeyStreamsExecutor.buildExecutableProcess( IP_EXCEPTION_PROCESS, 
-                                     						   createIpExceptionContext( mHockeyStreamsModel ),
-                                     						   createIpExceptionListener() );
+        		d( mHockeyStreamsExecutor.buildExecutableProcess( IP_EXCEPTION_PROCESS, 
+                                      						      createIpExceptionContext( mHockeyStreamsModel ),
+                                     						      createIpExceptionListener() ) );
         mGetLiveStreamsProcess = 
-        		mHockeyStreamsExecutor.buildExecutableProcess( GET_LIVE_STREAMS_ACTION, 
-                                     						   createGetLiveContext( mHockeyStreamsModel ),
-                                     						   createGetLiveListener() );
+        		d( mHockeyStreamsExecutor.buildExecutableProcess( GET_LIVE_STREAMS_ACTION, 
+                                     						      createGetLiveContext( mHockeyStreamsModel ),
+                                     						      createGetLiveListener() ) );
         
 		mLoginActionExecutable = d( createLoginActionExecutable( mLoginProcess,
 		                                                         mHockeyStreamsExecutor,
@@ -105,12 +104,12 @@ public class HockeyStreamsComponent extends AbstractComponent implements Compone
                                                                                    createVetoer( mHockeyStreamsModel, 
                                                                                                  GET_LIVE_VALIDATOR ) ) );
         
-        mView = doBuildView( mLoginPanelModel, 
-                             mHockeyStreamsModel, 
-                             mProgressPanelModel, 
-                             mLoginActionExecutable, 
-                             mIpExceptionActionExecutable, 
-                             mGetLiveStreamsActionExecutable );
+        mView = d( doBuildView( mLoginPanelModel, 
+                                mHockeyStreamsModel, 
+                                mProgressPanelModel, 
+                                mLoginActionExecutable, 
+                                mIpExceptionActionExecutable, 
+                                mGetLiveStreamsActionExecutable ) );
 	}
 	
 	@Override
