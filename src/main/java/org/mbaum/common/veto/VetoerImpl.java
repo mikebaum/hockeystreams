@@ -11,7 +11,7 @@ import org.mbaum.common.model.ModelValidator;
 
 import com.google.common.base.Preconditions;
 
-class VetoerImpl<M extends Model<? extends ModelValueId<?>, M>> implements Vetoer
+class VetoerImpl<M extends Model<M>> implements Vetoer
 {
 	private final M mModel;
 	private final ModelValidator<M> mValidator;
@@ -70,7 +70,7 @@ class VetoerImpl<M extends Model<? extends ModelValueId<?>, M>> implements Vetoe
 		mListener = listener;
 	}
 	
-	public static <M extends Model<? extends ModelValueId<?>, M>> Vetoer createVetoer( M model, ModelValidator<M> validator )
+	public static <M extends Model<M>> Vetoer createVetoer( M model, ModelValidator<M> validator )
 	{
 		return new VetoerImpl<M>( model, validator );
 	}

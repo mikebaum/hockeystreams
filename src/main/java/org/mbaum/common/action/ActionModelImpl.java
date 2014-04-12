@@ -11,7 +11,7 @@ import org.mbaum.common.veto.Vetoer;
 
 import com.google.common.collect.Lists;
 
-public class ActionModelImpl extends AbstractModel<ActionModel.Id<?>, ActionModel> implements ActionModel
+public class ActionModelImpl extends AbstractModel<ActionModel> implements ActionModel
 {
 	private final List<Vetoer> mVetoers = Lists.newArrayList();
 	private final MutableModelValue<Boolean> mEnabled;
@@ -28,24 +28,6 @@ public class ActionModelImpl extends AbstractModel<ActionModel.Id<?>, ActionMode
 	{
 		super.destroy();
 		destroyVetoers();
-	}
-	
-	@Override
-	public <T> MutableModelValue<T> getModelValue( Id<T> id )
-	{
-	    return super.getModelValue( id );
-	}
-	
-	@Override
-	public <T> T getValue( Id<T> id )
-	{
-	    return getModelValue( id ).get();
-	}
-	
-	@Override
-	public <T> void setValue( Id<T> id, T value )
-	{
-		getModelValue( id ).set( value );
 	}
 	
 	@Override

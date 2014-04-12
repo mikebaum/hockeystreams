@@ -5,11 +5,10 @@ import java.util.List;
 import org.mbaum.common.listener.ListenableSupport;
 import org.mbaum.common.listener.Listener;
 import org.mbaum.common.model.AbstractModel;
-import org.mbaum.common.model.MutableModelValue;
 
 import com.google.common.collect.Lists;
 
-public class OnlineRepositoryModelImpl extends AbstractModel<OnlineRepositoryModel.Id<?>, OnlineRepositoryModel> implements OnlineRepositoryModel
+public class OnlineRepositoryModelImpl extends AbstractModel<OnlineRepositoryModel> implements OnlineRepositoryModel
 {
 	public OnlineRepositoryModelImpl()
     {
@@ -23,24 +22,6 @@ public class OnlineRepositoryModelImpl extends AbstractModel<OnlineRepositoryMod
 		newModelValue( ACCESS_GROUP_IDS, (List<Integer>) Lists.<Integer>newArrayList(), "Access Group Ids", this );
     }
 	
-	@Override
-    public <T> MutableModelValue<T> getModelValue( Id<T> id )
-    {
-	    return super.getModelValue( id );
-    }
-
-	@Override
-    public <T> T getValue( Id<T> id )
-    {
-	    return getModelValue( id ).get();
-    }
-
-	@Override
-    public <T> void setValue( Id<T> id, T value )
-    {
-		getModelValue( id ).set( value );
-    }
-
 	@Override
     protected ListenableSupport<OnlineRepositoryModel, Listener<OnlineRepositoryModel>> createListenableSupport()
     {

@@ -11,7 +11,7 @@ import org.mbaum.serviio.net.transferobject.SharedFolder;
 
 import com.google.common.collect.Lists;
 
-public class RepositoryModelImpl extends AbstractModel<RepositoryModel.Id<?>, RepositoryModel> implements RepositoryModel
+public class RepositoryModelImpl extends AbstractModel<RepositoryModel> implements RepositoryModel
 {
 	public RepositoryModelImpl()
     {
@@ -27,24 +27,6 @@ public class RepositoryModelImpl extends AbstractModel<RepositoryModel.Id<?>, Re
 		newModelValue( ONLINE_CONTENT_PREFERRED_QUALITY, "", "Online Content Preferred Quality", this );
     }
 
-	@Override
-	public <T> MutableModelValue<T> getModelValue( Id<T> id )
-	{
-		return super.getModelValue( id );
-	}
-	
-	@Override
-	public <T> T getValue( Id<T> id )
-	{
-		return getModelValue( id ).get();
-	}
-	
-	@Override
-	public <T> void setValue( Id<T> id, T value )
-	{
-		getModelValue( id ).set( value );
-	}
-	
 	@Override
     protected ListenableSupport<RepositoryModel, Listener<RepositoryModel>> createListenableSupport()
     {

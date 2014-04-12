@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.mbaum.common.listener.ListenableSupport;
 import org.mbaum.common.listener.Listener;
-import org.mbaum.common.model.Model.ModelValueId;
 import org.mbaum.common.model.MutableModelValue.Builder;
 import org.mbaum.common.value.ValueImpl;
 import org.mbaum.common.value.VolatileValue;
@@ -14,9 +13,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 
-public abstract class AbstractModel<I extends ModelValueId<?>, M extends Model<I, M>> implements Model<I, M>
+public abstract class AbstractModel<M extends Model<M>> implements Model<M>
 {
-    private final Map<ModelValueId<?>, MutableModelValue<?>> mModelValues = Maps.newIdentityHashMap();
+    private final Map<ModelValueId<M, ?>, MutableModelValue<?>> mModelValues = Maps.newIdentityHashMap();
 	private final ListenableSupport<M, Listener<M>> mListenableSupport;
 	
     protected AbstractModel()
@@ -69,19 +68,19 @@ public abstract class AbstractModel<I extends ModelValueId<?>, M extends Model<I
     }
     
     @Override
-    public <T> T getValue( ModelValueId<T> id )
+    public <T> T getValue( ModelValueId<M, T> id )
     {
         return getModelValue( id ).get();
     }
     
     @Override
-    public <T> void setValue( ModelValueId<T> id, T value )
+    public <T> void setValue( ModelValueId<M, T> id, T value )
     {
     	getModelValue( id ).set( value );   	
     }
 
     @Override
-	public <T> MutableModelValue<T> getModelValue( ModelValueId<T> id )
+	public <T> MutableModelValue<T> getModelValue( ModelValueId<M, T> id )
     {
 	    @SuppressWarnings("unchecked")
         MutableModelValue<T> modelValue = (MutableModelValue<T>) mModelValues.get( id );
@@ -91,29 +90,25 @@ public abstract class AbstractModel<I extends ModelValueId<?>, M extends Model<I
     
     protected abstract ListenableSupport<M, Listener<M>> createListenableSupport();
     
-	protected <T> MutableModelValue<T> newModelValue( I id, T defaultValue, String description, M model )
+	protected <T> MutableModelValue<T> newModelValue( ModelValueId<M, T> id, T defaultValue, String description, M model )
 	{
-		@SuppressWarnings("unchecked")
-        ModelValueId<T> modelValueId = (ModelValueId<T>) id;
-		return createModelValueBuilder( defaultValue, description, model, modelValueId ).setCurrentValue( new ValueImpl<T>( defaultValue ) )
+		return createModelValueBuilder( defaultValue, description, model, id ).setCurrentValue( new ValueImpl<T>( defaultValue ) )
 																						.build();
 	}
 	
-	protected <T> MutableModelValue<T> newVolatileModelValue( I id,
+	protected <T> MutableModelValue<T> newVolatileModelValue( ModelValueId<M, T> id,
 	                                                          T defaultValue, 
 	                                                          String description, 
 	                                                          M model )
 	{
-		@SuppressWarnings("unchecked")
-        ModelValueId<T> modelValueId = (ModelValueId<T>) id;
-		return createModelValueBuilder( defaultValue, description, model, modelValueId ).setCurrentValue( new VolatileValue<T>( defaultValue ) )
+		return createModelValueBuilder( defaultValue, description, model, id ).setCurrentValue( new VolatileValue<T>( defaultValue ) )
 																			  			.build();
 	}
     
 	private <T> Builder<T> createModelValueBuilder( T defaultValue, 
 	                                                String description, 
 	                                                final M model, 
-	                                                final ModelValueId<T> id )
+	                                                final ModelValueId<M, T> id )
     {
 		return new Builder<T>( description, defaultValue )
 	    {
@@ -129,7 +124,7 @@ public abstract class AbstractModel<I extends ModelValueId<?>, M extends Model<I
 		};
     }
 	
-	private static <I extends ModelValueId<?>, T, M extends Model<I, M>> Listener<T> 
+	private static <T, M extends Model<M>> Listener<T> 
 		createModelValueListener( final ListenableSupport<M, Listener<M>> listenerSupport, final M model )
     {
         return new Listener<T>()
@@ -142,7 +137,7 @@ public abstract class AbstractModel<I extends ModelValueId<?>, M extends Model<I
 		};
     }
 	
-	protected static <I extends ModelValueId<?>, M extends Model<I, M>> ListenableSupport<M, Listener<M>> 
+	protected static <M extends Model<M>> ListenableSupport<M, Listener<M>> 
 		createModelListenerSupport( final M model )
 	{
 		return ListenableSupport.createListenableSupport( new Supplier<M>()

@@ -6,7 +6,7 @@ import org.mbaum.common.model.AbstractModel;
 import org.mbaum.common.model.MutableModelValue;
 import org.mbaum.serviio.net.transferobject.RepositoryResponse;
 
-public class ServiioModelImpl extends AbstractModel<ServiioModel.Id<?>, ServiioModel> implements ServiioModel
+public class ServiioModelImpl extends AbstractModel<ServiioModel> implements ServiioModel
 {
 	private static final String DEFAULT_HOSTNAME = "localhost";
 	private static final String DEFAULT_PORT = "23423";
@@ -18,24 +18,6 @@ public class ServiioModelImpl extends AbstractModel<ServiioModel.Id<?>, ServiioM
 		newModelValue( PORT, DEFAULT_PORT, "Port", this );
 		newModelValue( REPOSITORY_RESPONSE, new RepositoryResponse(), "Repository Response", this );
     }
-	
-	@Override
-	public <T> MutableModelValue<T> getModelValue( Id<T> id )
-	{
-		return super.getModelValue( id );
-	}
-	
-	@Override
-	public <T> T getValue( Id<T> id )
-	{
-		return getModelValue( id ).get();
-	}
-	
-	@Override
-	public <T> void setValue( Id<T> id, T value )
-	{
-		getModelValue( id ).set( value );
-	}
 	
 	@Override
     protected ListenableSupport<ServiioModel, Listener<ServiioModel>> createListenableSupport()

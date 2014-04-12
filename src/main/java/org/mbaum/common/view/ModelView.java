@@ -10,10 +10,9 @@ import javax.swing.JPanel;
 
 import org.mbaum.common.listener.Listener;
 import org.mbaum.common.model.Model;
-import org.mbaum.common.model.Model.ModelValueId;
 import org.mbaum.common.model.MutableModelValue;
 
-public class ModelView<M extends Model<? extends ModelValueId<?>, M>> implements View
+public class ModelView<M extends Model<M>> implements View
 {
 	private final M mModel;
 	private final JComponent mPanel;
