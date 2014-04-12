@@ -11,16 +11,14 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.log4j.Logger;
+import org.mbaum.common.Destroyable;
+import org.mbaum.common.osutils.apple.AppleUtils;
 import org.mbaum.hockeystreams.HockeyStreamsComponent;
 import org.mbaum.serviio.ServiioComponent;
 
-import com.apple.eawt.AppEvent.QuitEvent;
-import com.apple.eawt.Application;
-import com.apple.eawt.QuitHandler;
-import com.apple.eawt.QuitResponse;
-
-public class ServiioHockeyStreamsConsole
+public class ServiioHockeyStreamsConsole implements Destroyable
 {
 	static final Logger LOGGER = Logger.getLogger( ServiioHockeyStreamsConsole.class );
 	private static final int CONSOLE_MIN_HEIGHT = 120;
@@ -109,6 +107,19 @@ public class ServiioHockeyStreamsConsole
 	    return console.get();
 	}
 	
+	private static void initalizeMac( final Destroyable console )
+    {
+        AppleUtils.setAppleQuitHandler( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				console.destroy();
+        		System.exit( 0 );
+			}
+		} );
+    }
+	
 	public static void main( String[] args )
 	{
 		SwingUtilities.invokeLater( new Runnable()
@@ -116,18 +127,10 @@ public class ServiioHockeyStreamsConsole
 			@Override
 			public void run()
 			{
-			    final ServiioHockeyStreamsConsole console = 
-			        new ServiioHockeyStreamsConsole();
+			    final ServiioHockeyStreamsConsole console = new ServiioHockeyStreamsConsole();
 			    
-	              Application.getApplication().setQuitHandler( new QuitHandler()
-                  {
-                      @Override
-                      public void handleQuitRequestWith( QuitEvent arg0, QuitResponse arg1 )
-                      {
-                          console.destroy();
-                          System.exit( 0 );
-                      }
-                  } );
+			    if ( SystemUtils.IS_OS_MAC )
+	                initalizeMac( console );
 			}
 		} );
 	}
