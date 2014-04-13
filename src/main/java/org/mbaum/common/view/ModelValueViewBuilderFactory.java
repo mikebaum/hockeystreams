@@ -1,16 +1,18 @@
 package org.mbaum.common.view;
 
+import static org.mbaum.common.view.JTextFieldBuilders.textFieldBuilder;
+
 import java.util.Map;
 
+import org.mbaum.common.model.Model;
 import org.mbaum.common.model.MutableModelValue;
 
 import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.collect.Maps;
 
 public interface ModelValueViewBuilderFactory<T>
 {
-	ViewBuilder makeBuilder( MutableModelValue<T> value );
+	ViewBuilder makeBuilder( MutableModelValue<?, T> value );
 	
 	public static class Factories
 	{
@@ -22,7 +24,8 @@ public interface ModelValueViewBuilderFactory<T>
 		{
 			private static final Map<Class<?>, Function<String, ?>> CONVERTERS = Maps.newHashMap();
 			
-			private <T> void put( Class<T> clazz, Function<String, T> converter )
+			@SuppressWarnings("unused")
+            private <T> void put( Class<T> clazz, Function<String, T> converter )
 			{
 				CONVERTERS.put( clazz, converter );
 			}
@@ -39,23 +42,22 @@ public interface ModelValueViewBuilderFactory<T>
 		{
 			FACTORIES.put( String.class, new ModelValueViewBuilderFactory<String>(){
 				@Override
-                public ViewBuilder makeBuilder( MutableModelValue<String> value )
+                public ViewBuilder makeBuilder( MutableModelValue<?, String> value )
                 {
-					Function<String, String> extractor = Functions.identity();
-	                return new JTextFieldBuilder<String>( value, extractor );
+	                return textFieldBuilder( value );
                 }
 			} );
 			
 			FACTORIES.put( Boolean.class, new ModelValueViewBuilderFactory<Boolean>(){
 				@Override
-                public ViewBuilder makeBuilder( MutableModelValue<Boolean> value )
+                public ViewBuilder makeBuilder( MutableModelValue<?, Boolean> value )
                 {
 	                return new JCheckBoxBuilder( value );
                 }
 			} );
 		}
 		
-		public static <T> ViewBuilder getModelValueUIBuilder( final MutableModelValue<T> value )
+		public static <M extends Model<M>, T> ViewBuilder getModelValueUIBuilder( final MutableModelValue<M, T> value )
 		{
 			for( Map.Entry<Class<?>, ModelValueViewBuilderFactory<?>> entry : FACTORIES.entrySet() )
 			{				
@@ -70,7 +72,7 @@ public interface ModelValueViewBuilderFactory<T>
 			@SuppressWarnings("unchecked")
             Function<String, T> converter = (Function<String, T>) CONVERTERS.getConverter( (Class<T>) value.get().getClass() );
 
-			return new JTextFieldBuilder<T>( value, converter );
+			return textFieldBuilder( value, converter );
 		}
 	}
 }

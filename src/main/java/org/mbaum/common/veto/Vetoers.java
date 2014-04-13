@@ -7,7 +7,7 @@ public final class Vetoers
 {
     private Vetoers() {}
     
-    public static <M extends Model<M>> Vetoer createVetoer( M model, ModelValidator<M> validator )
+    public static <M extends Model<M>> Vetoer createVetoer( Model<M> model, ModelValidator<M> validator )
     {
         return VetoerImpl.createVetoer( model, validator );
     }

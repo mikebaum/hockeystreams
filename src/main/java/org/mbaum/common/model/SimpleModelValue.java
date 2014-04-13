@@ -1,15 +1,16 @@
 package org.mbaum.common.model;
 
+import org.mbaum.common.model.Model.ModelValueId;
 import org.mbaum.common.value.Value;
 
-class SimpleModelValue<T> implements ModelValue<T>
+class SimpleModelValue<M extends Model<M>, T> implements ModelValue<M, T>
 {
-	private final String mDescription;
+	private final ModelValueId<M, T> mId;
 	private final Value<T> mCurrentValue;
 
-	public SimpleModelValue( String description, Value<T> currentValue )
+	public SimpleModelValue( ModelValueId<M, T> id, Value<T> currentValue )
 	{
-		mDescription = description;
+		mId = id;
 		mCurrentValue = currentValue;
 	}
 
@@ -20,8 +21,8 @@ class SimpleModelValue<T> implements ModelValue<T>
 	}
 
 	@Override
-	public String getDescription()
+	public ModelValueId<M, T> getId()
 	{
-		return mDescription;
+		return mId;
 	}
 }

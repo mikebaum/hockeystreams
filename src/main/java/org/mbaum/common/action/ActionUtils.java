@@ -55,7 +55,8 @@ public final class ActionUtils
     
     public static ActionModel createActionModel( String description, Vetoer... vetoers )
     {
-        ActionModel actionModel = new ActionModelImpl( description );
+        ActionModel actionModel = new ActionModelImpl();
+        actionModel.setValue( ActionModel.DESCRIPTION, description );
         
         for ( Vetoer vetoer : vetoers )
             actionModel.addVetoer( vetoer );

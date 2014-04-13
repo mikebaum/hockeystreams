@@ -1,6 +1,7 @@
 package org.mbaum.common.action;
 
 import static org.mbaum.common.action.ActionExecutableListener.WARNING_LISTENER;
+import static org.mbaum.common.action.ActionModel.DESCRIPTION;
 import static org.mbaum.common.action.ActionModel.ENABLED;
 import static org.mbaum.common.execution.ProcessUtils.createExecutbleProcessRunnable;
 
@@ -11,6 +12,7 @@ import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessListener;
 import org.mbaum.common.execution.ProcessListenerAdapter;
 import org.mbaum.common.listener.Listener;
+import org.mbaum.common.model.Model;
 
 import com.google.common.base.Preconditions;
 
@@ -21,14 +23,14 @@ final class ActionExecutableImpl<T> implements ActionExecutable
     private final Executor mExecutor;
     private final ExecutableProcess<T> mExecutableProcess;
     private final ProcessListener<T> mProcessListener;
-    private final ActionModel mActionModel;
-    private final Listener<ActionModel> mActionModelListener;
+    private final Model<ActionModel> mActionModel;
+    private final Listener<Model<ActionModel>> mActionModelListener;
     
     private ActionExecutableListener mListener = WARNING_LISTENER;
 
     
     private ActionExecutableImpl( ExecutableProcess<T> executableProcess, 
-                                  ActionModel actionModel, 
+                                  Model<ActionModel> actionModel, 
                                   Executor executor )
     {
         mActionModel = actionModel;
@@ -39,7 +41,7 @@ final class ActionExecutableImpl<T> implements ActionExecutable
         mActionModelListener = createActionModelListener( this );
         actionModel.addListener( mActionModelListener );
         
-        mProcessListener = createIsFinishedListener( executableProcess, actionModel.getDescription(), this );
+        mProcessListener = createIsFinishedListener( executableProcess, actionModel.getValue( DESCRIPTION ), this );
         executableProcess.addListener( mProcessListener );
     }
     
@@ -112,12 +114,12 @@ final class ActionExecutableImpl<T> implements ActionExecutable
         };
     }
 
-    private static <T> Listener<ActionModel> createActionModelListener( final ActionExecutableImpl<T> actionExecutable )
+    private static <T> Listener<Model<ActionModel>> createActionModelListener( final ActionExecutableImpl<T> actionExecutable )
     {
-        return new Listener<ActionModel>()
+        return new Listener<Model<ActionModel>>()
         {
             @Override
-            public void handleChanged( ActionModel model )
+            public void handleChanged( Model<ActionModel> model )
             {
                 actionExecutable.fireActionEnabledChanged();
             }

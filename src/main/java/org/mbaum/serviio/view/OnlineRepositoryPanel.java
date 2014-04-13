@@ -1,5 +1,6 @@
 package org.mbaum.serviio.view;
 
+import static org.mbaum.common.model.Model.Builder.createModel;
 import static org.mbaum.common.view.ModelValueViewBuilderFactory.Factories.getModelValueUIBuilder;
 
 import javax.swing.GroupLayout;
@@ -9,18 +10,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.mbaum.common.listener.Listener;
+import org.mbaum.common.model.Model;
 import org.mbaum.common.model.MutableModelValue;
 import org.mbaum.common.view.View;
 import org.mbaum.serviio.model.OnlineRepositoryModel;
-import org.mbaum.serviio.model.OnlineRepositoryModelImpl;
 
 public class OnlineRepositoryPanel implements View
 {
 	private final JComponent mPanel;
-	private final OnlineRepositoryModel mModel;
-	private Listener<OnlineRepositoryModel> mModelListener;
+	private final Model<OnlineRepositoryModel> mModel;
+	private Listener<Model<OnlineRepositoryModel>> mModelListener;
 	
-	public OnlineRepositoryPanel( OnlineRepositoryModel model )
+	public OnlineRepositoryPanel( Model<OnlineRepositoryModel> model )
 	{
 		mModel = model;
 		mPanel = buildPanel( mModel );
@@ -30,7 +31,7 @@ public class OnlineRepositoryPanel implements View
 	
 	public OnlineRepositoryPanel()
 	{
-		this( new OnlineRepositoryModelImpl() );
+		this( createModel( OnlineRepositoryModel.class ) );
 	}
 	
 	@Override
@@ -45,19 +46,19 @@ public class OnlineRepositoryPanel implements View
 	    return mPanel;
     }
 	
-	private Listener<OnlineRepositoryModel> createModelListener()
+	private Listener<Model<OnlineRepositoryModel>> createModelListener()
     {
-	    return new Listener<OnlineRepositoryModel>()
+	    return new Listener<Model<OnlineRepositoryModel>>()
 	    {
 	    	@Override
-	    	public void handleChanged( OnlineRepositoryModel model )
+	    	public void handleChanged( Model<OnlineRepositoryModel> model )
 	    	{
 	    		updatePanel();
 	    	}
 	    };
     }
 
-	private JComponent buildPanel( OnlineRepositoryModel model )
+	private JComponent buildPanel( Model<OnlineRepositoryModel> model )
     {
 		JPanel panel = new JPanel();
 		GroupLayout layout = new GroupLayout( panel );
@@ -72,9 +73,9 @@ public class OnlineRepositoryPanel implements View
 		
 		GroupLayout.SequentialGroup vGroup = layout.createSequentialGroup();
 		
-		for ( MutableModelValue<?> value : model )
+		for ( MutableModelValue<OnlineRepositoryModel, ?> value : model )
 		{
-			JLabel label = new JLabel( value.getDescription() + " :" );
+			JLabel label = new JLabel( value.getId().getDescription() + " :" );
 			JComponent valueComponent = getModelValueUIBuilder( value ).buildView().getComponent();
 			
 			hLabelGroup.addComponent( label );

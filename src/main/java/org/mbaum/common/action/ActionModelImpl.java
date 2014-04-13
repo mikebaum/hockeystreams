@@ -1,26 +1,22 @@
 package org.mbaum.common.action;
 
+import static org.mbaum.common.model.Model.Builder.createModel;
+
 import java.util.List;
 
-import org.mbaum.common.listener.ListenableSupport;
-import org.mbaum.common.listener.Listener;
-import org.mbaum.common.model.AbstractModel;
-import org.mbaum.common.model.MutableModelValue;
+import org.mbaum.common.model.ForwardingModel;
 import org.mbaum.common.veto.VetoListener;
 import org.mbaum.common.veto.Vetoer;
 
 import com.google.common.collect.Lists;
 
-public class ActionModelImpl extends AbstractModel<ActionModel> implements ActionModel
+public class ActionModelImpl extends ForwardingModel<ActionModel> implements ActionModel
 {
 	private final List<Vetoer> mVetoers = Lists.newArrayList();
-	private final MutableModelValue<Boolean> mEnabled;
-	private final String mDescription;
-	
-	public ActionModelImpl( String description )
+
+	public ActionModelImpl()
     {
-		mDescription = description;
-		mEnabled = newVolatileModelValue( ENABLED, false, "Enabled", this );
+	    super( createModel( ActionModel.class ) );
     }
 	
 	@Override
@@ -38,12 +34,6 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 		updateEnabled();
 	}
 	
-	@Override
-	protected ListenableSupport<ActionModel, Listener<ActionModel>> createListenableSupport()
-	{
-	    return createModelListenerSupport( (ActionModel) this );
-	}
-	
 	private void updateEnabled()
 	{
 	    boolean isEnabled = true;
@@ -56,7 +46,7 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 	        }
 	    }
 	    
-	    mEnabled.set( isEnabled );
+	    setValue( ENABLED, isEnabled );
 	}
 
 	private VetoListener createVetoerListener()
@@ -78,10 +68,4 @@ public class ActionModelImpl extends AbstractModel<ActionModel> implements Actio
 		
 		mVetoers.clear();
 	}
-
-	@Override
-    public String getDescription()
-    {
-	    return mDescription;
-    }
 }

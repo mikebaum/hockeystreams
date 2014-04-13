@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.mbaum.common.model.Model;
 import org.mbaum.common.view.View;
 import org.mbaum.serviio.model.ServiioModel;
 
@@ -21,12 +22,12 @@ public class ServiioPanel implements View
 	private static final String SERVIIO_HOSTNAME_LABEL_TEXT = "Serviio Host Name:";
 	private static final String SERVIIO_PORT_LABEL_TEXT = "Port:";
 	
-	private final ServiioModel mServiioModel;
+	private final Model<ServiioModel> mServiioModel;
 	private final JTextField mServerHostName;
 	private final JComponent mPanel;
 	private final JTextField mServiioPortField;
 	
-	public ServiioPanel( ServiioModel serviioModel )
+	public ServiioPanel( Model<ServiioModel> serviioModel )
 	{
 		mServiioModel = serviioModel;
 		mServerHostName = new JTextField( 10 );
@@ -37,7 +38,7 @@ public class ServiioPanel implements View
 
 	private static JComponent buildPanel( JTextField serviioHostNameField, 
 										  JTextField serviioPortField, 
-										  ServiioModel model )
+										  Model<ServiioModel> model )
 	{
 		JPanel urlPanel = new JPanel();
 
@@ -73,7 +74,7 @@ public class ServiioPanel implements View
 		return mPanel;
 	}
     
-    private static KeyListener createPortFieldKeyListener( final ServiioModel model, 
+    private static KeyListener createPortFieldKeyListener( final Model<ServiioModel> model, 
     													   final JTextField portField )
     {
         return new KeyAdapter()
@@ -86,7 +87,7 @@ public class ServiioPanel implements View
         };
     }
 
-    private static KeyListener createHostNameFieldKeyListener( final ServiioModel model, 
+    private static KeyListener createHostNameFieldKeyListener( final Model<ServiioModel> model, 
                                                                final JTextField hostNameField )
     {
         return new KeyAdapter()

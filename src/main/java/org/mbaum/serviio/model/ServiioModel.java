@@ -7,7 +7,10 @@ import org.mbaum.serviio.net.transferobject.RepositoryResponse;
 
 public interface ServiioModel extends Model<ServiioModel>
 {
-	static final ModelValueId<ServiioModel, String> HOST_NAME = createId();
-	static final ModelValueId<ServiioModel, String> PORT = createId();
-	static final ModelValueId<ServiioModel, RepositoryResponse> REPOSITORY_RESPONSE = createId();
+    static final String DEFAULT_HOSTNAME = "localhost";
+    static final String DEFAULT_PORT = "23423";
+    
+	static final ModelValueId<ServiioModel, String> HOST_NAME = createId( "Hostname", DEFAULT_HOSTNAME );
+	static final ModelValueId<ServiioModel, String> PORT = createId( "Port", DEFAULT_PORT );
+	static final ModelValueId<ServiioModel, RepositoryResponse> REPOSITORY_RESPONSE = createId( "Repository Response", new RepositoryResponse() );
 }

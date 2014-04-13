@@ -4,6 +4,7 @@ import static org.mbaum.common.action.ActionUtils.buildActionExecutable;
 import static org.mbaum.common.action.ActionUtils.createAction;
 import static org.mbaum.common.action.ActionUtils.createActionModel;
 import static org.mbaum.common.execution.ProgressPanelExecutor.createProgressPanelExecutor;
+import static org.mbaum.common.model.Model.Builder.createModel;
 import static org.mbaum.common.veto.Vetoers.createVetoer;
 import static org.mbaum.serviio.model.ServiioModel.HOST_NAME;
 import static org.mbaum.serviio.model.ServiioModel.PORT;
@@ -29,14 +30,14 @@ import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessExecutorService;
 import org.mbaum.common.execution.ProcessListener;
 import org.mbaum.common.execution.ProcessListenerAdapter;
+import org.mbaum.common.model.Model;
 import org.mbaum.common.model.ModelValidator;
-import org.mbaum.common.model.ProgressPanelModelImpl;
+import org.mbaum.common.model.ProgressPanelModel;
 import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.View;
 import org.mbaum.common.view.ViewBuilder;
 import org.mbaum.hockeystreams.AbstractComponent;
 import org.mbaum.serviio.model.ServiioModel;
-import org.mbaum.serviio.model.ServiioModelImpl;
 import org.mbaum.serviio.net.ActionContext;
 import org.mbaum.serviio.net.ServiioApiActions.PingContext;
 import org.mbaum.serviio.net.ServiioApiActions.RepositoryContext;
@@ -55,13 +56,13 @@ public class ServiioComponent extends AbstractComponent implements Component
 
 	private static final Logger LOGGER = Logger.getLogger( ServiioComponent.class );
 	
-	private final ServiioModel mServiioModel;
+	private final Model<ServiioModel> mServiioModel;
 	private final View mView;
 	private final JFrame mFrame;
 	private final ExecutableProcess<PingResponse> mPingAction;
 	private final ExecutableProcess<RepositoryResponse> mRepositoryProcess;
 	private final ExecutableProcess<PingResponse> mUpdateRepositoryProcess;
-	private final ProgressPanelModelImpl mProgressPanelModel;
+	private final Model<ProgressPanelModel> mProgressPanelModel;
 	private final ProcessExecutorService mServiioProcessExecutor;
     private final ActionExecutable mPingActionExecutable;
 	private final ActionExecutable mRepositoryActionExecutable;
@@ -72,8 +73,8 @@ public class ServiioComponent extends AbstractComponent implements Component
 	public ServiioComponent( JFrame frame )
 	{
 		mFrame = frame;
-		mServiioModel = d( new ServiioModelImpl() );
-		mProgressPanelModel = d( new ProgressPanelModelImpl() );
+		mServiioModel = d( createModel( ServiioModel.class ) );
+		mProgressPanelModel = d( createModel( ProgressPanelModel.class ) );
 		mServiioProcessExecutor = createProgressPanelExecutor( mProgressPanelModel, "ServiioRESTApiExecutor" );
 
 		mPingAction = d( mServiioProcessExecutor.buildExecutableProcess( PING_PROCESS, 
@@ -116,7 +117,7 @@ public class ServiioComponent extends AbstractComponent implements Component
         mView = d( buildView( mServiioModel, mPingActionExecutable, mRepositoryActionExecutable, mUpdateRepositoryActionExecutable ) );
 	}
 	
-	private ActionContext createActionContext( ServiioModel serviioModel )
+	private ActionContext createActionContext( Model<ServiioModel> serviioModel )
     {
 //		List<OnlineRepository> onlineRepositories = serviioModel.getRepositoryResponse().getOnlineRepositories();
 //		
@@ -137,19 +138,19 @@ public class ServiioComponent extends AbstractComponent implements Component
 		};
 	}
 
-	private static PingContext createPingContext( final ServiioModel serviioModel )
+	private static PingContext createPingContext( final Model<ServiioModel> serviioModel )
 	{
 		return new PingContext()
 		{
 			@Override
-			public ServiioModel getServiioModel()
+			public Model<ServiioModel> getServiioModel()
 			{
 				return serviioModel;
 			}
 		};
 	}
 	
-	private static ProcessListener<RepositoryResponse> createRepositoryProcessListener( final ServiioModel model )
+	private static ProcessListener<RepositoryResponse> createRepositoryProcessListener( final Model<ServiioModel> model )
 	{
 		return new ProcessListenerAdapter<RepositoryResponse>()
 		{
@@ -181,22 +182,22 @@ public class ServiioComponent extends AbstractComponent implements Component
 		};
 	}
 	
-	private static RepositoryContext createRepositoryContext( final ServiioModel serviioModel )
+	private static RepositoryContext createRepositoryContext( final Model<ServiioModel> serviioModel )
 	{
 		return new RepositoryContext()
 		{
 			@Override
-			public ServiioModel getServiioModel()
+			public Model<ServiioModel> getServiioModel()
 			{
 				return serviioModel;
 			}
 		};
 	}
 
-	private static View buildView( ServiioModel serviioModel, 
-									     ActionExecutable pingActionExecutable,
-									     ActionExecutable repositoryActionExecutable, 
-									     ActionExecutable updateRepositoryActionExecutable )
+	private static View buildView( Model<ServiioModel> serviioModel, 
+	                               ActionExecutable pingActionExecutable,
+	                               ActionExecutable repositoryActionExecutable, 
+	                               ActionExecutable updateRepositoryActionExecutable )
 	{
 		final JPanel serviioPanel = new JPanel( new BorderLayout() );
 		
@@ -223,7 +224,7 @@ public class ServiioComponent extends AbstractComponent implements Component
 		return new ModelValidator<ServiioModel>()
         {
             @Override
-            public boolean isValid( ServiioModel model )
+            public boolean isValid( Model<ServiioModel> model )
             {
                 if ( StringUtils.isBlank( model.getValue( HOST_NAME ) ) )
                     return false;

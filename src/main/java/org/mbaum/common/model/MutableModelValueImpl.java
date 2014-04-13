@@ -4,20 +4,21 @@ import static org.mbaum.common.listener.ListenableSupport.createListenableSuppor
 
 import org.mbaum.common.listener.ListenableSupport;
 import org.mbaum.common.listener.Listener;
+import org.mbaum.common.model.Model.ModelValueId;
 import org.mbaum.common.value.Value;
 
-class MutableModelValueImpl<T> implements MutableModelValue<T>
+class MutableModelValueImpl<M extends Model<M>, T> implements MutableModelValue<M, T>
 {
 	private final Value<T> mValue;
 	private final T mDefaultValue;
-	private final String mDescription;
 	private final ListenableSupport<T, Listener<T>> mListenableSupport;
+    private final ModelValueId<M, T> mId;
 
-	public MutableModelValueImpl( Value<T> currentValue, T defaultValue, String description )
+	public MutableModelValueImpl( Value<T> currentValue, T defaultValue, ModelValueId<M, T> id )
 	{
 		mValue = currentValue;
 		mDefaultValue = defaultValue;
-		mDescription = description;
+		mId = id;
 		mListenableSupport = createListenableSupport( this );
 	}
 
@@ -41,9 +42,9 @@ class MutableModelValueImpl<T> implements MutableModelValue<T>
     }
 	
 	@Override
-	public String getDescription()
+	public ModelValueId<M, T> getId()
 	{
-	    return mDescription;
+	    return mId;
 	}
 
 	@Override

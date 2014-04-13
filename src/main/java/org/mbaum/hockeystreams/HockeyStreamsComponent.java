@@ -4,6 +4,7 @@ import static org.mbaum.common.action.ActionUtils.buildActionExecutable;
 import static org.mbaum.common.action.ActionUtils.createAction;
 import static org.mbaum.common.action.ActionUtils.createActionModel;
 import static org.mbaum.common.execution.ProgressPanelExecutor.createProgressPanelExecutor;
+import static org.mbaum.common.model.Model.Builder.createModel;
 import static org.mbaum.common.model.ProgressPanelModel.MESSAGE;
 import static org.mbaum.common.veto.Vetoers.createVetoer;
 import static org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.GET_LIVE_STREAMS_ACTION;
@@ -31,17 +32,15 @@ import org.mbaum.common.execution.ProcessExecutorService;
 import org.mbaum.common.execution.ProcessListener;
 import org.mbaum.common.execution.ProcessListenerAdapter;
 import org.mbaum.common.execution.ResultHandler;
+import org.mbaum.common.model.Model;
 import org.mbaum.common.model.ProgressPanelModel;
-import org.mbaum.common.model.ProgressPanelModelImpl;
 import org.mbaum.common.veto.Vetoer;
 import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.ProgressPanel;
 import org.mbaum.common.view.View;
 import org.mbaum.common.view.ViewBuilder;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
-import org.mbaum.hockeystreams.model.HockeyStreamsModelImpl;
 import org.mbaum.hockeystreams.model.LoginPanelModel;
-import org.mbaum.hockeystreams.model.LoginPanelModelImpl;
 import org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.GetLiveStreamsContext;
 import org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.IpExectionsContext;
 import org.mbaum.hockeystreams.net.action.HockeyStreamsApiProcesses.LoginContext;
@@ -57,8 +56,8 @@ public class HockeyStreamsComponent extends AbstractComponent implements Compone
 	private static final String LIVE_STREAMS = "LIVE_STREAMS";
 	private static final Logger LOGGER = Logger.getLogger( HockeyStreamsComponent.class );
 	
-	private final LoginPanelModel mLoginPanelModel;
-    private final HockeyStreamsModel mHockeyStreamsModel;
+	private final Model<LoginPanelModel> mLoginPanelModel;
+    private final Model<HockeyStreamsModel> mHockeyStreamsModel;
     private final ExecutableProcess<LoginResponse> mLoginProcess;
     private final ExecutableProcess<IpExceptionResponse> mIpExceptionProcess;
     private final ExecutableProcess<GetLiveResponse> mGetLiveStreamsProcess;
@@ -66,14 +65,14 @@ public class HockeyStreamsComponent extends AbstractComponent implements Compone
     private final ActionExecutable mIpExceptionActionExecutable;
     private final ActionExecutable mGetLiveStreamsActionExecutable;
     private final ProcessExecutorService mHockeyStreamsExecutor;
-	private final ProgressPanelModel mProgressPanelModel;
+	private final Model<ProgressPanelModel> mProgressPanelModel;
 	private final View mView;
 	
 	public HockeyStreamsComponent( JFrame parent )
 	{
-		mLoginPanelModel = d( new LoginPanelModelImpl() );
-		mHockeyStreamsModel = d( new HockeyStreamsModelImpl() );
-		mProgressPanelModel = d( new ProgressPanelModelImpl() );
+		mLoginPanelModel = d( createModel( LoginPanelModel.class ) );
+		mHockeyStreamsModel = d( createModel( HockeyStreamsModel.class ) );
+		mProgressPanelModel = d( createModel( ProgressPanelModel.class ) );
 		mHockeyStreamsExecutor = d( createProgressPanelExecutor( mProgressPanelModel, "HockeyStreamsRESTApiExecutor" ) );
 		
         mLoginProcess = 
@@ -118,7 +117,7 @@ public class HockeyStreamsComponent extends AbstractComponent implements Compone
 	    return mView;
 	}
 	
-	private static ResultHandler<LoginResponse> createLoginResultHandler( final ProgressPanelModel progressPanelModel )
+	private static ResultHandler<LoginResponse> createLoginResultHandler( final Model<ProgressPanelModel> progressPanelModel )
 	{
 		return new ResultHandler<LoginResponse>()
 		{
@@ -187,7 +186,7 @@ public class HockeyStreamsComponent extends AbstractComponent implements Compone
 		};
 	}
 
-	private static ProcessListener<LoginResponse> createLoginListener( final HockeyStreamsModel model, 
+	private static ProcessListener<LoginResponse> createLoginListener( final Model<HockeyStreamsModel> model, 
 			                                                           final java.awt.Component messageDialogParent )
 	{
 		return new ProcessListenerAdapter<LoginResponse>()
@@ -210,45 +209,45 @@ public class HockeyStreamsComponent extends AbstractComponent implements Compone
 		};
 	}
 
-	private static GetLiveStreamsContext createGetLiveContext( final HockeyStreamsModel model )
+	private static GetLiveStreamsContext createGetLiveContext( final Model<HockeyStreamsModel> model )
     {
         return new GetLiveStreamsContext()
         {
             @Override
-            public HockeyStreamsModel getModel()
+            public Model<HockeyStreamsModel> getModel()
             {
                 return model;
             }
         };
     }
 
-    private static IpExectionsContext createIpExceptionContext( final HockeyStreamsModel model )
+    private static IpExectionsContext createIpExceptionContext( final Model<HockeyStreamsModel> model )
     {
         return new IpExectionsContext()
         {
             @Override
-            public HockeyStreamsModel getModel()
+            public Model<HockeyStreamsModel> getModel()
             {
                 return model;
             }
         };
     }
 
-    private static LoginContext createLoginContext( final LoginPanelModel loginPanelModel )
+    private static LoginContext createLoginContext( final Model<LoginPanelModel> loginPanelModel )
     {
         return new LoginContext()
         {
             @Override
-            public LoginPanelModel getLoginPanelModel()
+            public Model<LoginPanelModel> getLoginPanelModel()
             {
                 return loginPanelModel;
             }
         };
     }
 
-    private static View doBuildView( LoginPanelModel loginPanelModel, 
-    								 HockeyStreamsModel hockeyStreamsModel,
-    								 ProgressPanelModel progressPanelModel,
+    private static View doBuildView( Model<LoginPanelModel> loginPanelModel, 
+    								 Model<HockeyStreamsModel> hockeyStreamsModel,
+    								 Model<ProgressPanelModel> progressPanelModel,
     								 ActionExecutable loginActionExecutable, 
     								 ActionExecutable ipExceptionActionExecutable,
     								 ActionExecutable getLiveStreamsActionExecutable )

@@ -16,49 +16,43 @@ import javax.swing.event.DocumentListener;
 import org.apache.commons.lang3.StringUtils;
 import org.mbaum.common.Destroyable;
 import org.mbaum.common.listener.Listener;
+import org.mbaum.common.model.Model;
 import org.mbaum.common.model.MutableModelValue;
+import org.mbaum.common.view.ViewBuilder.ViewImpl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
-import com.google.common.base.Preconditions;
 
-public class JTextFieldBuilder<T> implements ViewBuilder
+public class JTextFieldBuilders
 {
 	private static final Function<String, String> STRING_IDENTITY_EXTRACTOR = Functions.identity();
 	
-	private final MutableModelValue<T> mModelValue;
-	private final Function<String, T> mModelValueExtractor;
-	
-	public JTextFieldBuilder( MutableModelValue<T> modelValue, Function<String, T> modelValueExtractor )
-    {
-		mModelValueExtractor = modelValueExtractor;
-		mModelValue = Preconditions.checkNotNull( modelValue );
-    }
-	
-	@Override
-	public View buildView()
+	public static <M extends Model<M>, T> ViewBuilder textFieldBuilder( final MutableModelValue<M, T> modelValue, 
+	                                                                    final Function<String, T> modelValueExtractor )
 	{
-		return buildTextField( mModelValue, mModelValueExtractor );
+		return new ViewBuilder()
+        {
+            @Override
+            public View buildView()
+            {
+                return buildTextField( modelValue, modelValueExtractor, new JTextField() );
+            }
+        };
 	}
 	
-	public static <T> View buildTextField( MutableModelValue<T> modelValue, Function<String, T> modelValueExtractor )
+	public static <M extends Model<M>> ViewBuilder textFieldBuilder( MutableModelValue<M, String> modelValue )
 	{
-		return buildTextField( modelValue, modelValueExtractor, new JTextField() );
+		return textFieldBuilder( modelValue, STRING_IDENTITY_EXTRACTOR );
 	}
 	
-	public static View buildTextField( MutableModelValue<String> modelValue )
-	{
-		return buildTextField( modelValue, STRING_IDENTITY_EXTRACTOR );
-	}
-	
-	public static View buildPasswordField( MutableModelValue<String> modelValue )
+	public static <M extends Model<M>> View passwordFieldBuilder( MutableModelValue<M, String> modelValue )
 	{
 		return buildTextField( modelValue, STRING_IDENTITY_EXTRACTOR, new JPasswordField() );
 	}
 	
-	private static <T> View buildTextField( final MutableModelValue<T> modelValue,
-			                                Function<String, T> modelValueExtractor, 
-			                                final JTextField textField )
+	private static <M extends Model<M>, T> View buildTextField( final MutableModelValue<M, T> modelValue,
+	                                                            Function<String, T> modelValueExtractor, 
+	                                                            final JTextField textField )
 	{
 		final JPanel panel = new JPanel();
 		
@@ -66,7 +60,7 @@ public class JTextFieldBuilder<T> implements ViewBuilder
 		textField.setText( value );
 		textField.setColumns( Math.max( 10, value.length() ) );
 		
-		panel.add( new JLabel( modelValue.getDescription() + ": " ) );
+		panel.add( new JLabel( modelValue.getId().getDescription() + ": " ) );
 		panel.add( textField );
 
 		final Listener<T> listener = createModelValueListener( textField );
@@ -91,9 +85,10 @@ public class JTextFieldBuilder<T> implements ViewBuilder
 		}, panel );
 	}
 	
-	private static <T> DocumentListener createDocumentListener( final JTextField textField, 
-													       	    final MutableModelValue<T> modelValue,
-													       	    final Function<String, T> modelValueExtractor )
+	private static <M extends Model<M>, T> DocumentListener 
+	    createDocumentListener( final JTextField textField, 
+	                            final MutableModelValue<M, T> modelValue,
+	                            final Function<String, T> modelValueExtractor )
     {
 	    return new DocumentListener()
 		{

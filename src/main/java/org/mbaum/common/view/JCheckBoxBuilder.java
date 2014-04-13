@@ -16,9 +16,9 @@ import com.google.common.base.Preconditions;
 
 public class JCheckBoxBuilder implements ViewBuilder
 {
-	private final MutableModelValue<Boolean> mModelValue;
+	private final MutableModelValue<?, Boolean> mModelValue;
 	
-	public JCheckBoxBuilder( MutableModelValue<Boolean> modelValue )
+	public JCheckBoxBuilder( MutableModelValue<?, Boolean> modelValue )
     {
 		mModelValue = modelValue;
     }
@@ -50,7 +50,7 @@ public class JCheckBoxBuilder implements ViewBuilder
 		}, checkBox );
 	}
 
-	private static ChangeListener createChangeListener( final MutableModelValue<Boolean> modelValue,
+	private static ChangeListener createChangeListener( final MutableModelValue<?, Boolean> modelValue,
 														final JCheckBox checkBox )
     {
 	    return new ChangeListener()

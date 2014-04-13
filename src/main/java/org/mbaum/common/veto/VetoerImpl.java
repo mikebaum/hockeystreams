@@ -6,20 +6,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.mbaum.common.listener.Listener;
 import org.mbaum.common.model.Model;
-import org.mbaum.common.model.Model.ModelValueId;
 import org.mbaum.common.model.ModelValidator;
 
 import com.google.common.base.Preconditions;
 
 class VetoerImpl<M extends Model<M>> implements Vetoer
 {
-	private final M mModel;
+	private final Model<M> mModel;
 	private final ModelValidator<M> mValidator;
 	private final AtomicBoolean mVetoing = new AtomicBoolean();
-	private final Listener<M> mModelListener;
+	private final Listener<Model<M>> mModelListener;
 	private VetoListener mListener = NULL_LISTENER;
 	
-	private VetoerImpl( M model, ModelValidator<M> validator )
+	private VetoerImpl( Model<M> model, ModelValidator<M> validator )
 	{
 		mModel = model;
 		mValidator = validator;
@@ -29,12 +28,12 @@ class VetoerImpl<M extends Model<M>> implements Vetoer
 		model.addListener( mModelListener );
 	}
 	
-	private Listener<M> createModelListener()
+	private Listener<Model<M>> createModelListener()
 	{
-		return new Listener<M>()
+		return new Listener<Model<M>>()
 		{
 			@Override
-            public void handleChanged( M model )
+            public void handleChanged( Model<M> model )
             {
 				updateVetoing();
             }
@@ -70,7 +69,7 @@ class VetoerImpl<M extends Model<M>> implements Vetoer
 		mListener = listener;
 	}
 	
-	public static <M extends Model<M>> Vetoer createVetoer( M model, ModelValidator<M> validator )
+	public static <M extends Model<M>> Vetoer createVetoer( Model<M> model, ModelValidator<M> validator )
 	{
 		return new VetoerImpl<M>( model, validator );
 	}

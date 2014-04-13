@@ -24,6 +24,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.mbaum.common.execution.Process;
 import org.mbaum.common.execution.ProcessContext;
+import org.mbaum.common.model.Model;
 import org.mbaum.common.net.HttpProcess;
 import org.mbaum.serviio.model.ServiioModel;
 import org.mbaum.serviio.net.transferobject.OnlineRepository;
@@ -116,15 +117,15 @@ public final class ServiioApiActions
 	
 	public static interface PingContext extends ProcessContext
 	{
-		ServiioModel getServiioModel();
+	    Model<ServiioModel> getServiioModel();
 	}
 	
 	public static interface RepositoryContext extends ProcessContext
 	{
-		ServiioModel getServiioModel();
+		Model<ServiioModel> getServiioModel();
 	}
 	
-	private static HttpUriRequest buildGetRequest( ServiioModel serviioModel, String path )
+	private static HttpUriRequest buildGetRequest( Model<ServiioModel> serviioModel, String path )
 			throws URISyntaxException
 	{
 		return RequestBuilder.get().setUri( buildUri( serviioModel, path ) )
@@ -132,7 +133,7 @@ public final class ServiioApiActions
 				                   .build();
 	}
 	
-	private static <T> HttpUriRequest buildPutRequest( ServiioModel serviioModel, String path, T data )
+	private static <T> HttpUriRequest buildPutRequest( Model<ServiioModel> serviioModel, String path, T data )
 	    throws URISyntaxException, JsonGenerationException, JsonMappingException, IOException, JAXBException
 	{
 		HttpEntity input = createJsonInputString( data );
@@ -156,7 +157,7 @@ public final class ServiioApiActions
 		return input;
     }
 
-	private static URI buildUri( ServiioModel serviioModel, String path )
+	private static URI buildUri( Model<ServiioModel> serviioModel, String path )
 			throws URISyntaxException
 	{
 		return new URIBuilder().setHost( serviioModel.getValue( HOST_NAME ) )

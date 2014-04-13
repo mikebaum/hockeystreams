@@ -14,6 +14,7 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.mbaum.common.execution.Process;
 import org.mbaum.common.execution.ProcessContext;
+import org.mbaum.common.model.Model;
 import org.mbaum.common.model.ModelValidator;
 import org.mbaum.common.net.HttpProcess;
 import org.mbaum.hockeystreams.model.HockeyStreamsModel;
@@ -41,17 +42,17 @@ public class HockeyStreamsApiProcesses
     
     public static interface IpExectionsContext extends ProcessContext
     {
-        HockeyStreamsModel getModel();
+        Model<HockeyStreamsModel> getModel();
     }
     
     public static interface GetLiveStreamsContext extends ProcessContext
     {
-        HockeyStreamsModel getModel();
+        Model<HockeyStreamsModel> getModel();
     }
     
     public static interface LoginContext extends ProcessContext
     {
-        LoginPanelModel getLoginPanelModel();
+        Model<LoginPanelModel> getLoginPanelModel();
     }
     
     private static Process<IpExectionsContext, IpExceptionResponse> createIpExceptionProcess()
@@ -97,7 +98,7 @@ public class HockeyStreamsApiProcesses
 			@Override
 			protected HttpUriRequest buildRequest( LoginContext context )
 			{
-				LoginPanelModel loginPanelModel = context.getLoginPanelModel();
+				Model<LoginPanelModel> loginPanelModel = context.getLoginPanelModel();
 				
 				HttpEntity entity = 
 			        EntityBuilder.create()
@@ -120,7 +121,7 @@ public class HockeyStreamsApiProcesses
         return new ModelValidator<HockeyStreamsModel>()
         {
             @Override
-            public boolean isValid( HockeyStreamsModel model )
+            public boolean isValid( Model<HockeyStreamsModel> model )
             {
                 return ! StringUtils.isBlank( model.getValue( SESSION_TOKEN ) );
             }
@@ -132,7 +133,7 @@ public class HockeyStreamsApiProcesses
         return new ModelValidator<LoginPanelModel>()
         {
             @Override
-            public boolean isValid( LoginPanelModel model )
+            public boolean isValid( Model<LoginPanelModel> model )
             {
                 if ( StringUtils.isBlank( model.getValue( USERNAME ) ) )
                     return false;

@@ -1,7 +1,5 @@
 package org.mbaum.common.view;
 
-import static org.mbaum.common.view.ModelValueViewBuilderFactory.Factories.getModelValueUIBuilder;
-
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.JComponent;
@@ -14,11 +12,11 @@ import org.mbaum.common.model.MutableModelValue;
 
 public class ModelView<M extends Model<M>> implements View
 {
-	private final M mModel;
+	private final Model<M> mModel;
 	private final JComponent mPanel;
-	private Listener<M> mModelListener;
+	private Listener<Model<M>> mModelListener;
 	
-	public ModelView( M model )
+	public ModelView( Model<M> model )
     {
 		mModel = model;
 		mPanel = buildPanel( mModel );
@@ -38,7 +36,7 @@ public class ModelView<M extends Model<M>> implements View
 	    return mPanel;
     }
 
-	private JComponent buildPanel( M model )
+	private JComponent buildPanel( Model<M> model )
     {
 		JPanel panel = new JPanel();
 		GroupLayout layout = new GroupLayout( panel );
@@ -53,10 +51,12 @@ public class ModelView<M extends Model<M>> implements View
 		
 		GroupLayout.SequentialGroup vGroup = layout.createSequentialGroup();
 		
-		for ( MutableModelValue<?> value : model )
+		for ( MutableModelValue<M, ?> value : model )
 		{
-			JLabel label = new JLabel( value.getDescription() + " :" );
-			JComponent view = getModelValueUIBuilder( value ).buildView().getComponent();
+			JLabel label = new JLabel( value.getId().getDescription() + " :" );
+			JComponent view = ModelValueViewBuilderFactory.Factories.getModelValueUIBuilder( value )
+			                                                        .buildView()
+			                                                        .getComponent();
 			
 			hLabelGroup.addComponent( label );
 			hValueGroup.addComponent( view );
@@ -75,12 +75,12 @@ public class ModelView<M extends Model<M>> implements View
 		return panel;
     }
 	
-	private Listener<M> createModelListener()
+	private Listener<Model<M>> createModelListener()
     {
-	    return new Listener<M>()
+	    return new Listener<Model<M>>()
 	    {
 			@Override
-            public void handleChanged( M newValue )
+            public void handleChanged( Model<M> newValue )
             {
 				updatePanel();
             }
