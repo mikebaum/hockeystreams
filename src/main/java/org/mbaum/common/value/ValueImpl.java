@@ -32,4 +32,10 @@ public class ValueImpl<T> implements Value<T>
 	{
 	    return mValue == null;
 	}
+
+    @Override
+    public String toString()
+    {
+        return "ValueImpl [mValue=" + mValue + "]";
+    }
 }

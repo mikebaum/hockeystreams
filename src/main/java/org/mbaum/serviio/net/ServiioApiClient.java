@@ -1,6 +1,6 @@
 package org.mbaum.serviio.net;
 
-import static org.mbaum.common.net.parse.Parsers.newJsonParser;
+import static org.mbaum.common.net.parse.ResponseParsers.newJsonParser;
 
 import java.io.IOException;
 

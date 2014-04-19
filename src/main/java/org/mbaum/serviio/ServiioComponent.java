@@ -37,12 +37,12 @@ import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.View;
 import org.mbaum.common.view.ViewBuilder;
 import org.mbaum.hockeystreams.AbstractComponent;
+import org.mbaum.serviio.model.RepositoryModel;
 import org.mbaum.serviio.model.ServiioModel;
 import org.mbaum.serviio.net.ActionContext;
 import org.mbaum.serviio.net.ServiioApiActions.PingContext;
 import org.mbaum.serviio.net.ServiioApiActions.RepositoryContext;
 import org.mbaum.serviio.net.transferobject.PingResponse;
-import org.mbaum.serviio.net.transferobject.RepositoryResponse;
 import org.mbaum.serviio.net.transferobject.ServiioAction;
 import org.mbaum.serviio.view.ServiioPanel;
 
@@ -60,7 +60,7 @@ public class ServiioComponent extends AbstractComponent implements Component
 	private final View mView;
 	private final JFrame mFrame;
 	private final ExecutableProcess<PingResponse> mPingAction;
-	private final ExecutableProcess<RepositoryResponse> mRepositoryProcess;
+	private final ExecutableProcess<Model<RepositoryModel>> mRepositoryProcess;
 	private final ExecutableProcess<PingResponse> mUpdateRepositoryProcess;
 	private final Model<ProgressPanelModel> mProgressPanelModel;
 	private final ProcessExecutorService mServiioProcessExecutor;
@@ -150,12 +150,12 @@ public class ServiioComponent extends AbstractComponent implements Component
 		};
 	}
 	
-	private static ProcessListener<RepositoryResponse> createRepositoryProcessListener( final Model<ServiioModel> model )
+	private static ProcessListener<Model<RepositoryModel>> createRepositoryProcessListener( final Model<ServiioModel> model )
 	{
-		return new ProcessListenerAdapter<RepositoryResponse>()
+		return new ProcessListenerAdapter<Model<RepositoryModel>>()
 		{
 			@Override
-			public void handleResult( RepositoryResponse result )
+			public void handleResult( Model<RepositoryModel> result )
 			{
 				LOGGER.info( "repository: " + result );
 				model.setValue( REPOSITORY_RESPONSE, result );

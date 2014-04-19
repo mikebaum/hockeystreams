@@ -75,7 +75,7 @@ public class OnlineRepositoryPanel implements View
 		
 		for ( MutableModelValue<OnlineRepositoryModel, ?> value : model )
 		{
-			JLabel label = new JLabel( value.getId().getDescription() + " :" );
+			JLabel label = new JLabel( value.getId().getName() + " :" );
 			JComponent valueComponent = getModelValueUIBuilder( value ).buildView().getComponent();
 			
 			hLabelGroup.addComponent( label );

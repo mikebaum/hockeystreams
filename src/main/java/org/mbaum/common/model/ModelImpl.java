@@ -14,6 +14,7 @@ import org.mbaum.common.value.VolatileValue;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 public class ModelImpl<M extends Model<M>> implements Model<M>
@@ -132,7 +133,19 @@ public class ModelImpl<M extends Model<M>> implements Model<M>
 	    return modelValue;
     }
     
-	protected <T> MutableModelValue<M, T> newModelValue( ModelValueId<M, T> id, T defaultValue )
+    @Override
+    public ImmutableList<ModelValueId<M, ?>> getIds()
+    {
+        return ImmutableList.copyOf( mModelValues.keySet() );
+    }
+    
+	@Override
+    public String toString()
+    {
+        return "ModelImpl [mModelValues=" + mModelValues.values() + "]";
+    }
+
+    protected <T> MutableModelValue<M, T> newModelValue( ModelValueId<M, T> id, T defaultValue )
 	{
 		return createModelValueBuilder( defaultValue, id ).setCurrentValue( new ValueImpl<T>( defaultValue ) )
 														  .build();

@@ -1,8 +1,9 @@
 package org.mbaum.hockeystreams.model;
 
-import static org.mbaum.common.model.Model.IdBuilder.createId;
+import static org.mbaum.common.model.ModelValueIdUtils.createId;
 
 import org.mbaum.common.model.Model;
+import org.mbaum.common.model.ModelValueId;
 
 public interface LoginPanelModel extends Model<LoginPanelModel>
 {

@@ -53,7 +53,7 @@ public class ModelView<M extends Model<M>> implements View
 		
 		for ( MutableModelValue<M, ?> value : model )
 		{
-			JLabel label = new JLabel( value.getId().getDescription() + " :" );
+			JLabel label = new JLabel( value.getId().getName() + " :" );
 			JComponent view = ModelValueViewBuilderFactory.Factories.getModelValueUIBuilder( value )
 			                                                        .buildView()
 			                                                        .getComponent();

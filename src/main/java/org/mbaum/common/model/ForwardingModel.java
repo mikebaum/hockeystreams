@@ -4,6 +4,8 @@ import java.util.Iterator;
 
 import org.mbaum.common.listener.Listener;
 
+import com.google.common.collect.ImmutableList;
+
 public class ForwardingModel<M extends Model<M>> implements Model<M>
 {
     private final Model<M> mModel;
@@ -65,5 +67,11 @@ public class ForwardingModel<M extends Model<M>> implements Model<M>
     public <T> void setValue( ModelValueId<M, T> id, T value )
     {
         mModel.setValue( id, value );
+    }
+
+    @Override
+    public ImmutableList<ModelValueId<M, ?>> getIds()
+    {
+        return mModel.getIds();
     }
 }

@@ -1,6 +1,5 @@
 package org.mbaum.common.model;
 
-import org.mbaum.common.model.Model.ModelValueId;
 import org.mbaum.common.value.Value;
 
 class SimpleModelValue<M extends Model<M>, T> implements ModelValue<M, T>

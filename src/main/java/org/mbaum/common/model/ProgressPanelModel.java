@@ -1,6 +1,8 @@
 package org.mbaum.common.model;
 
-import static org.mbaum.common.model.Model.IdBuilder.createId;
+import static org.mbaum.common.model.ModelValueIdUtils.createId;
+
+
 
 public interface ProgressPanelModel extends Model<ProgressPanelModel>
 {

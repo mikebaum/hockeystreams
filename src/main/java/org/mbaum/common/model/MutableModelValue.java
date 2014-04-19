@@ -2,7 +2,6 @@ package org.mbaum.common.model;
 
 import org.mbaum.common.listener.Listenable;
 import org.mbaum.common.listener.Listener;
-import org.mbaum.common.model.Model.ModelValueId;
 import org.mbaum.common.value.Value;
 import org.mbaum.common.value.ValueImpl;
 
@@ -29,7 +28,7 @@ public interface MutableModelValue<M extends Model<M>, T> extends Listenable<T, 
 			if ( mCurrentValue.isEmpty() )
 				mCurrentValue = new ValueImpl<T>( mDefaultValue );
 				
-			return new MutableModelValueImpl<M, T>( mCurrentValue, mDefaultValue, mId );
+			return new MutableModelValueImpl<M, T>( mId, mCurrentValue );
 		}
 
 		public Builder<M, T> setCurrentValue( Value<T> currentValue )
@@ -38,19 +37,9 @@ public interface MutableModelValue<M extends Model<M>, T> extends Listenable<T, 
 			return this;
 		}
 		
-		public static <M extends Model<M>, T> Builder<M, T> create( ModelValueId<M, T> id, T defaultValue )
-		{
-			return new Builder<M, T>( id, defaultValue );
-		}
-		
-		public static <M extends Model<M>, T> MutableModelValue<M, T> newModelValue( ModelValueId<M, T> id, T defaultValue )
-		{
-		    return create( id, defaultValue ).build();
-		}
-		
 		public static <M extends Model<M>, T> MutableModelValue<M, T> newModelValue( ModelValueId<M, T> id )
 		{
-		    return create( id, id.getDefaultValue() ).build();
+		    return new Builder<M, T>( id, id.getDefaultValue() ).build();
 		}
 	}
 }

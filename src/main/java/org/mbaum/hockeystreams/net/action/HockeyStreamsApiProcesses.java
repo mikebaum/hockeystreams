@@ -1,6 +1,6 @@
 package org.mbaum.hockeystreams.net.action;
 
-import static org.mbaum.common.net.parse.Parsers.newJsonParser;
+import static org.mbaum.common.net.parse.ResponseParsers.newJsonParser;
 import static org.mbaum.hockeystreams.model.HockeyStreamsModel.SESSION_TOKEN;
 import static org.mbaum.hockeystreams.model.LoginPanelModel.API_KEY;
 import static org.mbaum.hockeystreams.model.LoginPanelModel.PASSWORD;
@@ -91,7 +91,7 @@ public class HockeyStreamsApiProcesses
         };
     }
 
-    private static Process<LoginContext, LoginResponse> createLoginProcess( )
+    private static Process<LoginContext, LoginResponse> createLoginProcess()
     {
     	return new HttpProcess<LoginContext, LoginResponse>( newJsonParser( LoginResponse.class ), "login" )
         {

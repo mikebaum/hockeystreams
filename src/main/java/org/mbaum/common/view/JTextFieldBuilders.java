@@ -60,7 +60,7 @@ public class JTextFieldBuilders
 		textField.setText( value );
 		textField.setColumns( Math.max( 10, value.length() ) );
 		
-		panel.add( new JLabel( modelValue.getId().getDescription() + ": " ) );
+		panel.add( new JLabel( modelValue.getId().getName() + ": " ) );
 		panel.add( textField );
 
 		final Listener<T> listener = createModelValueListener( textField );
