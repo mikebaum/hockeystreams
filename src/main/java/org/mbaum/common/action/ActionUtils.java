@@ -10,6 +10,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 
 import org.mbaum.common.execution.ExecutableProcess;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.veto.Vetoer;
 
 public final class ActionUtils
@@ -17,7 +18,7 @@ public final class ActionUtils
     private ActionUtils(){}
     
     public static ActionExecutable buildActionExecutable( ExecutableProcess<?> executableProcess, 
-                                                          ActionModel actionModel, 
+                                                          MutableModel<ActionModel> actionModel, 
                                                           Executor executor )
     {
         return createActionExecutable( executableProcess, actionModel, executor );

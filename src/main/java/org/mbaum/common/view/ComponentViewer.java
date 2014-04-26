@@ -26,7 +26,7 @@ public class ComponentViewer
 	private final Set<Class<? extends View>> mViews;
 	private JPanel mContentPane;
 	private JPanel mViewSelectorPanel;
-	private JComboBox mViewComboBox;
+	private JComboBox<?> mViewComboBox;
 
 	public ComponentViewer( Set<Class<? extends View>> views )
 	{
@@ -42,7 +42,7 @@ public class ComponentViewer
 		
 		mViewSelectorPanel = new JPanel();
 		mViewSelectorPanel.add( new JLabel( "Select View: " ) );
-		mViewComboBox = new JComboBox( mViews.toArray() );
+		mViewComboBox = new JComboBox<Object>( mViews.toArray() );
 		mViewSelectorPanel.add( mViewComboBox );
 		mViewSelectorPanel.add( new JButton( createRefreshViewAction() ) );
 		

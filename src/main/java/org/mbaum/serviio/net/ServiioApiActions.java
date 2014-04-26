@@ -1,7 +1,7 @@
 package org.mbaum.serviio.net;
 
 import static org.mbaum.common.net.parse.ResponseParsers.newJsonParser;
-import static org.mbaum.common.net.parse.ResponseParsers.newModelJsonParser;
+import static org.mbaum.common.net.parse.ResponseParsers.newMutableModelJsonParser;
 import static org.mbaum.serviio.model.ServiioModel.HOST_NAME;
 import static org.mbaum.serviio.model.ServiioModel.PORT;
 import static org.mbaum.serviio.model.ServiioModel.REPOSITORY_RESPONSE;
@@ -26,6 +26,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.mbaum.common.execution.Process;
 import org.mbaum.common.execution.ProcessContext;
 import org.mbaum.common.model.Model;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.net.HttpProcess;
 import org.mbaum.serviio.model.OnlineRepositoryModel;
 import org.mbaum.serviio.model.RepositoryModel;
@@ -41,7 +42,7 @@ public final class ServiioApiActions
 	private static final String ACTION_PATH = "/rest/action";
 	
 	public static final Process<PingContext, PingResponse> PING_PROCESS = createPingProcess();
-	public static final Process<RepositoryContext, Model<RepositoryModel>> REPOSITORY_PROCESS = createRepositoryProcess();
+	public static final Process<RepositoryContext, MutableModel<RepositoryModel>> REPOSITORY_PROCESS = createRepositoryProcess();
 	public static final Process<RepositoryContext, PingResponse> UPDATE_REPOSITORY_PROCESS = createUpdateRepositoryProcess();
 	public static final Process<ActionContext, PingResponse> ACTION_PROCESS = createActionProcess();
 	
@@ -79,9 +80,9 @@ public final class ServiioApiActions
 		};
 	}
 
-	private static Process<RepositoryContext, Model<RepositoryModel>> createRepositoryProcess()
+	private static Process<RepositoryContext, MutableModel<RepositoryModel>> createRepositoryProcess()
 	{
-		return new HttpProcess<RepositoryContext, Model<RepositoryModel>>( newModelJsonParser( RepositoryModel.class ), "repository" )
+		return new HttpProcess<RepositoryContext, MutableModel<RepositoryModel>>( newMutableModelJsonParser( RepositoryModel.class ), "repository" )
 		{
 			@Override
 			protected HttpUriRequest buildRequest( RepositoryContext context )
@@ -100,9 +101,9 @@ public final class ServiioApiActions
 			protected HttpUriRequest buildRequest( RepositoryContext context )
 					throws Exception
 			{
-			    Model<RepositoryModel> repositoryResponse = context.getServiioModel().getValue( REPOSITORY_RESPONSE );
+			    MutableModel<RepositoryModel> repositoryResponse = context.getServiioModel().getValue( REPOSITORY_RESPONSE );
 				
-				List<Model<OnlineRepositoryModel>> onlineRepositories = repositoryResponse.getValue( RepositoryModel.ONLINE_REPOSITORIES );
+				List<MutableModel<OnlineRepositoryModel>> onlineRepositories = repositoryResponse.getValue( RepositoryModel.ONLINE_REPOSITORIES );
 				onlineRepositories.remove( 0 );
 //				OnlineRepository newRepo = (OnlineRepository) onlineRepositories.get( 0 ).clone();
 //				newRepo.setId( null );

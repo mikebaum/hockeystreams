@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
 import org.mbaum.common.listener.Listener;
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.model.ProgressPanelModel;
 
 public class ProgressPanel implements View
@@ -19,7 +19,7 @@ public class ProgressPanel implements View
     private final JProgressBar mProgressBar;
     private final JComponent mPanel;
     
-    public ProgressPanel( Model<ProgressPanelModel> model )
+    public ProgressPanel( MutableModel<ProgressPanelModel> model )
     {
         mProgressBar = createProgressBar();
         mPanel = initGui( mProgressBar );
@@ -55,12 +55,12 @@ public class ProgressPanel implements View
         return panel;
     }
     
-    private static Listener<Model<ProgressPanelModel>> createProgressModelListener( final JProgressBar progressBar )
+    private static Listener<MutableModel<ProgressPanelModel>> createProgressModelListener( final JProgressBar progressBar )
 	{
-		return new Listener<Model<ProgressPanelModel>>()
+		return new Listener<MutableModel<ProgressPanelModel>>()
 		{
 			@Override
-            public void handleChanged( Model<ProgressPanelModel> model )
+            public void handleChanged( MutableModel<ProgressPanelModel> model )
             {
 				progressBar.setIndeterminate( model.getValue( INDETERMINATE ) );
 				progressBar.setString( model.getValue( MESSAGE ) );

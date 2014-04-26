@@ -33,12 +33,6 @@ public class ListenableSupport<T, L extends Listener<T>> implements Listenable<T
 		mListeners.remove( listener );
 	}
 	
-	@Override
-	public void clearListeners()
-	{
-		mListeners.clear();
-	}
-	
 	/**
 	 * Will notify the listeners with the current value.
 	 * 
@@ -59,6 +53,7 @@ public class ListenableSupport<T, L extends Listener<T>> implements Listenable<T
 			listener.handleChanged( mValueSupplier.get() );
 	}
 	
+	@Override
 	public void destroy()
 	{
 		mListeners.clear();

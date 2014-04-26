@@ -7,16 +7,17 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.mbaum.common.listener.Listener;
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.ModelSpec;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.model.MutableModelValue;
 
-public class ModelView<M extends Model<M>> implements View
+public class ModelView<M extends ModelSpec> implements View
 {
-	private final Model<M> mModel;
+	private final MutableModel<M> mModel;
 	private final JComponent mPanel;
-	private Listener<Model<M>> mModelListener;
+	private Listener<MutableModel<M>> mModelListener;
 	
-	public ModelView( Model<M> model )
+	public ModelView( MutableModel<M> model )
     {
 		mModel = model;
 		mPanel = buildPanel( mModel );
@@ -36,7 +37,7 @@ public class ModelView<M extends Model<M>> implements View
 	    return mPanel;
     }
 
-	private JComponent buildPanel( Model<M> model )
+	private JComponent buildPanel( MutableModel<M> model )
     {
 		JPanel panel = new JPanel();
 		GroupLayout layout = new GroupLayout( panel );
@@ -75,12 +76,12 @@ public class ModelView<M extends Model<M>> implements View
 		return panel;
     }
 	
-	private Listener<Model<M>> createModelListener()
+	private Listener<MutableModel<M>> createModelListener()
     {
-	    return new Listener<Model<M>>()
+	    return new Listener<MutableModel<M>>()
 	    {
 			@Override
-            public void handleChanged( Model<M> newValue )
+            public void handleChanged( MutableModel<M> newValue )
             {
 				updatePanel();
             }

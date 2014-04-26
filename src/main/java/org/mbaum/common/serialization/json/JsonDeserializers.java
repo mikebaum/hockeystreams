@@ -1,7 +1,7 @@
 package org.mbaum.common.serialization.json;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.mbaum.common.model.Model.Builder.createModel;
+import static org.mbaum.common.model.MutableModel.Builder.createMutableModel;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,12 +10,13 @@ import java.util.Map;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.ModelSpec;
 import org.mbaum.common.model.ModelValueId;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.object.ObjectConversionException;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 public class JsonDeserializers
 {
@@ -48,18 +49,18 @@ public class JsonDeserializers
         };
     }
     
-    public static <R extends Model<R>> JsonDeserializer<Model<R>> createModelDeserializer( final Class<R> modelClass )
+    public static <M extends ModelSpec> JsonDeserializer<MutableModel<M>> createMutableModelDeserializer( final Class<M> modelClass )
     {
-        return new JsonDeserializer<Model<R>>()
+        return new JsonDeserializer<MutableModel<M>>()
         {
             @Override
-            public Model<R> deserialize( String jsonString ) throws JsonException
+            public MutableModel<M> deserialize( String jsonString ) throws JsonException
             {
                 try
                 {
                     @SuppressWarnings("unchecked")
                     HashMap<String, Object> result = new ObjectMapper().readValue( jsonString, HashMap.class );
-                    return createModelFromMap( modelClass, result );
+                    return createMutableModelFromMap( modelClass, result );
                 }
                 catch ( JsonParseException e )
                 {
@@ -81,37 +82,36 @@ public class JsonDeserializers
         };
     }
     
-    public static <R extends Model<R>> Model<R> createModelFromMap( Class<R> modelClass,
-                                                                    Map<String, Object> result )
+    public static <M extends ModelSpec> MutableModel<M> createMutableModelFromMap( Class<M> modelClass,
+                                                                                    Map<String, Object> result )
         throws ObjectConversionException
     {
-        Model<R> model = createModel( modelClass );
-        Map<String, ModelValueId<R, ?>> ids = getModelIdsMap( model );
+        MutableModel<M> model = createMutableModel( modelClass );
+        Map<String, ModelValueId<M, ?>> ids = getModelIdsMap( model );
         
         for ( Map.Entry<String, Object> entry : result.entrySet() )
         {
-            ModelValueId<R, ?> id = ids.get( entry.getKey() );
+            ModelValueId<M, ?> id = ids.get( entry.getKey() );
             setModelValue( model, id, entry.getValue() );
         }
         
         return model;
     }
 
-    private static <M extends Model<M>, T> void setModelValue( Model<M> model,
-                                                               ModelValueId<M, T> id,
-                                                               Object value ) throws ObjectConversionException
+    private static <M extends ModelSpec, T> void setModelValue( MutableModel<M> model,
+                                                                 ModelValueId<M, T> id,
+                                                                 Object value ) throws ObjectConversionException
     {
-        // TODO: handle collections, arrays and values that are of type model (recursion!!!)
         model.setValue( checkNotNull( id ), id.valueFrom( value ) );
     }
 
-    private static <R extends Model<R>> ImmutableMap<String, ModelValueId<R, ?>> getModelIdsMap( Model<R> model )
+    private static <M extends ModelSpec> ImmutableMap<String, ModelValueId<M, ?>> getModelIdsMap( MutableModel<M> model )
     {
-        ImmutableList<ModelValueId<R, ?>> ids = model.getIds();
+        ImmutableSet<ModelValueId<M, ?>> ids = model.getIds();
         
-        ImmutableMap.Builder<String, ModelValueId<R, ?>> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<String, ModelValueId<M, ?>> builder = ImmutableMap.builder();
         
-        for ( ModelValueId<R, ?> modelValueId : ids )
+        for ( ModelValueId<M, ?> modelValueId : ids )
             builder.put( modelValueId.getName(), modelValueId );
         
         return builder.build();

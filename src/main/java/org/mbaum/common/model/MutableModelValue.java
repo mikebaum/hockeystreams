@@ -5,41 +5,41 @@ import org.mbaum.common.listener.Listener;
 import org.mbaum.common.value.Value;
 import org.mbaum.common.value.ValueImpl;
 
-public interface MutableModelValue<M extends Model<M>, T> extends Listenable<T, Listener<T>>, ModelValue<M, T>
+public interface MutableModelValue<I extends ModelSpec, T> extends Listenable<T, Listener<T>>, ModelValue<I, T>
 {
 	void set( T value );
 	
 	void reset();
 	
-	public static class Builder<M extends Model<M>, T>
+	public static class Builder<I extends ModelSpec, T>
 	{
-		private final ModelValueId<M, T> mId;
+		private final ModelValueId<I, T> mId;
 		private final T mDefaultValue;
 		private Value<T> mCurrentValue = Value.EmptyValue.emptyValue();
 		
-		public Builder( ModelValueId<M, T> id, T defaultValue )
+		public Builder( ModelValueId<I, T> id )
         {
 			mId = id;
-			mDefaultValue = defaultValue;
+			mDefaultValue = id.getDefaultValue();
         }
 
-		public MutableModelValue<M, T> build()
+		public MutableModelValue<I, T> build()
 		{
 			if ( mCurrentValue.isEmpty() )
 				mCurrentValue = new ValueImpl<T>( mDefaultValue );
 				
-			return new MutableModelValueImpl<M, T>( mId, mCurrentValue );
+			return new MutableModelValueImpl<I, T>( mId, mCurrentValue );
 		}
 
-		public Builder<M, T> setCurrentValue( Value<T> currentValue )
+		public Builder<I, T> setCurrentValue( Value<T> currentValue )
 		{
 			mCurrentValue = currentValue;
 			return this;
 		}
 		
-		public static <M extends Model<M>, T> MutableModelValue<M, T> newModelValue( ModelValueId<M, T> id )
+		public static <I extends ModelSpec, T> MutableModelValue<I, T> newModelValue( ModelValueId<I, T> id )
 		{
-		    return new Builder<M, T>( id, id.getDefaultValue() ).build();
+		    return new Builder<I, T>( id ).build();
 		}
 	}
 }

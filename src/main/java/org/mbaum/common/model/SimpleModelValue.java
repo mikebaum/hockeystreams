@@ -1,17 +1,24 @@
 package org.mbaum.common.model;
 
 import org.mbaum.common.value.Value;
+import org.mbaum.common.value.ValueImpl;
 
-class SimpleModelValue<M extends Model<M>, T> implements ModelValue<M, T>
+class SimpleModelValue<I extends ModelSpec, T> implements ModelValue<I, T>
 {
-	private final ModelValueId<M, T> mId;
+	private final ModelValueId<I, T> mId;
 	private final Value<T> mCurrentValue;
 
-	public SimpleModelValue( ModelValueId<M, T> id, Value<T> currentValue )
+	public SimpleModelValue( ModelValueId<I, T> id, Value<T> currentValue )
 	{
 		mId = id;
 		mCurrentValue = currentValue;
 	}
+	
+	public SimpleModelValue( ModelValueId<I, T> id, T currentValue )
+    {
+        mId = id;
+        mCurrentValue = new ValueImpl<T>( currentValue );
+    }
 
 	@Override
 	public T get()
@@ -20,7 +27,7 @@ class SimpleModelValue<M extends Model<M>, T> implements ModelValue<M, T>
 	}
 
 	@Override
-	public ModelValueId<M, T> getId()
+	public ModelValueId<I, T> getId()
 	{
 		return mId;
 	}

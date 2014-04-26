@@ -1,6 +1,7 @@
 package org.mbaum.common.net.parse;
 
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.ModelSpec;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.serialization.json.JsonDeserializers;
 
 public final class ResponseParsers
@@ -12,8 +13,8 @@ public final class ResponseParsers
 		return new JsonResponseParser<R>( resultClass );
 	}
 	
-	public static <R extends Model<R>> ResponseParser<Model<R>> newModelJsonParser( Class<R> modelResultClass )
+	public static <M extends ModelSpec> ResponseParser<MutableModel<M>> newMutableModelJsonParser( Class<M> modelResultClass )
 	{
-	    return new JsonResponseParser<Model<R>>( JsonDeserializers.createModelDeserializer( modelResultClass ) );
+	    return new JsonResponseParser<MutableModel<M>>( JsonDeserializers.createMutableModelDeserializer( modelResultClass ) );
 	}
 }

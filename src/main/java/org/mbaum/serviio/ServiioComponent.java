@@ -4,7 +4,7 @@ import static org.mbaum.common.action.ActionUtils.buildActionExecutable;
 import static org.mbaum.common.action.ActionUtils.createAction;
 import static org.mbaum.common.action.ActionUtils.createActionModel;
 import static org.mbaum.common.execution.ProgressPanelExecutor.createProgressPanelExecutor;
-import static org.mbaum.common.model.Model.Builder.createModel;
+import static org.mbaum.common.model.MutableModel.Builder.createMutableModel;
 import static org.mbaum.common.veto.Vetoers.createVetoer;
 import static org.mbaum.serviio.model.ServiioModel.HOST_NAME;
 import static org.mbaum.serviio.model.ServiioModel.PORT;
@@ -17,7 +17,6 @@ import static org.mbaum.serviio.net.ServiioApiActions.UPDATE_REPOSITORY_PROCESS;
 import java.awt.BorderLayout;
 
 import javax.swing.Action;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +31,7 @@ import org.mbaum.common.execution.ProcessListener;
 import org.mbaum.common.execution.ProcessListenerAdapter;
 import org.mbaum.common.model.Model;
 import org.mbaum.common.model.ModelValidator;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.model.ProgressPanelModel;
 import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.View;
@@ -56,13 +56,12 @@ public class ServiioComponent extends AbstractComponent implements Component
 
 	private static final Logger LOGGER = Logger.getLogger( ServiioComponent.class );
 	
-	private final Model<ServiioModel> mServiioModel;
+	private final MutableModel<ServiioModel> mServiioModel;
 	private final View mView;
-	private final JFrame mFrame;
 	private final ExecutableProcess<PingResponse> mPingAction;
-	private final ExecutableProcess<Model<RepositoryModel>> mRepositoryProcess;
+	private final ExecutableProcess<MutableModel<RepositoryModel>> mRepositoryProcess;
 	private final ExecutableProcess<PingResponse> mUpdateRepositoryProcess;
-	private final Model<ProgressPanelModel> mProgressPanelModel;
+	private final MutableModel<ProgressPanelModel> mProgressPanelModel;
 	private final ProcessExecutorService mServiioProcessExecutor;
     private final ActionExecutable mPingActionExecutable;
 	private final ActionExecutable mRepositoryActionExecutable;
@@ -70,11 +69,10 @@ public class ServiioComponent extends AbstractComponent implements Component
 
 	private final ExecutableProcess<PingResponse> mRefreshRepoActionExecutable;
 	
-	public ServiioComponent( JFrame frame )
+	public ServiioComponent()
 	{
-		mFrame = frame;
-		mServiioModel = d( createModel( ServiioModel.class ) );
-		mProgressPanelModel = d( createModel( ProgressPanelModel.class ) );
+		mServiioModel = d( createMutableModel( ServiioModel.class ) );
+		mProgressPanelModel = d( createMutableModel( ProgressPanelModel.class ) );
 		mServiioProcessExecutor = createProgressPanelExecutor( mProgressPanelModel, "ServiioRESTApiExecutor" );
 
 		mPingAction = d( mServiioProcessExecutor.buildExecutableProcess( PING_PROCESS, 
@@ -150,14 +148,13 @@ public class ServiioComponent extends AbstractComponent implements Component
 		};
 	}
 	
-	private static ProcessListener<Model<RepositoryModel>> createRepositoryProcessListener( final Model<ServiioModel> model )
+	private static ProcessListener<MutableModel<RepositoryModel>> createRepositoryProcessListener( final MutableModel<ServiioModel> model )
 	{
-		return new ProcessListenerAdapter<Model<RepositoryModel>>()
+		return new ProcessListenerAdapter<MutableModel<RepositoryModel>>()
 		{
 			@Override
-			public void handleResult( Model<RepositoryModel> result )
+			public void handleResult( MutableModel<RepositoryModel> result )
 			{
-				LOGGER.info( "repository: " + result );
 				model.setValue( REPOSITORY_RESPONSE, result );
 			}
 			
@@ -194,7 +191,7 @@ public class ServiioComponent extends AbstractComponent implements Component
 		};
 	}
 
-	private static View buildView( Model<ServiioModel> serviioModel, 
+	private static View buildView( MutableModel<ServiioModel> serviioModel, 
 	                               ActionExecutable pingActionExecutable,
 	                               ActionExecutable repositoryActionExecutable, 
 	                               ActionExecutable updateRepositoryActionExecutable )

@@ -29,7 +29,7 @@ public class ServiioHockeyStreamsConsole implements Destroyable
 	{
         JFrame frame = new JFrame( "Serviio HockeyStreams Console" );
         mHockeyStreamsComponent = new HockeyStreamsComponent( frame );
-        mServiioComponent = new ServiioComponent( frame );
+        mServiioComponent = new ServiioComponent();
         
         frame.addWindowListener( createOnCloseListener() );
         

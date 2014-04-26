@@ -4,13 +4,13 @@ import java.util.Iterator;
 
 import org.mbaum.common.listener.Listener;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
-public class ForwardingModel<M extends Model<M>> implements Model<M>
+public class ForwardingModel<M extends ModelSpec> implements MutableModel<M>
 {
-    private final Model<M> mModel;
+    private final MutableModel<M> mModel;
     
-    public ForwardingModel( Model<M> model )
+    public ForwardingModel( MutableModel<M> model )
     {
         mModel = model;
     }
@@ -22,21 +22,15 @@ public class ForwardingModel<M extends Model<M>> implements Model<M>
     }
 
     @Override
-    public void addListener( Listener<Model<M>> listener )
+    public void addListener( Listener<MutableModel<M>> listener )
     {
         mModel.addListener( listener );
     }
 
     @Override
-    public void removeListener( Listener<Model<M>> listener )
+    public void removeListener( Listener<MutableModel<M>> listener )
     {
         mModel.removeListener( listener );
-    }
-
-    @Override
-    public void clearListeners()
-    {
-        mModel.clearListeners();
     }
 
     @Override
@@ -70,7 +64,7 @@ public class ForwardingModel<M extends Model<M>> implements Model<M>
     }
 
     @Override
-    public ImmutableList<ModelValueId<M, ?>> getIds()
+    public ImmutableSet<ModelValueId<M, ?>> getIds()
     {
         return mModel.getIds();
     }

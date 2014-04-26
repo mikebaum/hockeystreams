@@ -1,6 +1,6 @@
 package org.mbaum.hockeystreams.view;
 
-import static org.mbaum.common.model.Model.Builder.createModel;
+import static org.mbaum.common.model.MutableModel.Builder.createMutableModel;
 import static org.mbaum.common.view.JTextFieldBuilders.passwordFieldBuilder;
 import static org.mbaum.common.view.JTextFieldBuilders.textFieldBuilder;
 import static org.mbaum.hockeystreams.model.LoginPanelModel.PASSWORD;
@@ -15,25 +15,27 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.view.View;
 import org.mbaum.hockeystreams.model.LoginPanelModel;
 
 public class LoginPanel implements View
 {
     private JPanel mPanel;
-	private static View mUsernameView;
-	private static View mPasswordView;
+	private View mUsernameView;
+	private View mPasswordView;
 
-    public LoginPanel( Model<LoginPanelModel> model, Action loginAction )
+    public LoginPanel( MutableModel<LoginPanelModel> model, Action loginAction )
     {
-        mPanel = createLoginPanel( model, loginAction );
+        mUsernameView = textFieldBuilder( model.getModelValue( USERNAME ) ).buildView();
+        mPasswordView = passwordFieldBuilder( model.getModelValue( PASSWORD ) ).buildView();
+        mPanel = createLoginPanel( mUsernameView, mPasswordView, loginAction );
     }
     
     @SuppressWarnings("serial")
     public LoginPanel()
     {
-    	this( createModel( LoginPanelModel.class ), new AbstractAction( "Login" )
+    	this( createMutableModel( LoginPanelModel.class ), new AbstractAction( "Login" )
     	{
 			@Override
             public void actionPerformed( ActionEvent e ){}
@@ -53,16 +55,12 @@ public class LoginPanel implements View
         return mPanel;
     }
     
-    private static JPanel createLoginPanel( Model<LoginPanelModel> model, Action loginAction )
+    private static JPanel createLoginPanel( View usernameView, View passwordView, Action loginAction )
     {
         JPanel authenticationPanel = new JPanel();
-        
-        mUsernameView = textFieldBuilder( model.getModelValue( USERNAME ) ).buildView();
-		authenticationPanel.add( mUsernameView.getComponent() );
-		
-        mPasswordView = passwordFieldBuilder( model.getModelValue( PASSWORD ) );
-		authenticationPanel.add( mPasswordView.getComponent() );
-        
+
+        authenticationPanel.add( usernameView.getComponent() );
+		authenticationPanel.add( passwordView.getComponent() );
         authenticationPanel.add( new JButton( loginAction ) );
         
         JPanel topPanel = new JPanel( new BorderLayout() );

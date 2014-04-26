@@ -1,6 +1,6 @@
 package org.mbaum.serviio.view;
 
-import static org.mbaum.common.model.Model.Builder.createModel;
+import static org.mbaum.common.model.MutableModel.Builder.createMutableModel;
 import static org.mbaum.common.view.ModelValueViewBuilderFactory.Factories.getModelValueUIBuilder;
 
 import javax.swing.GroupLayout;
@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.mbaum.common.listener.Listener;
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.model.MutableModelValue;
 import org.mbaum.common.view.View;
 import org.mbaum.serviio.model.OnlineRepositoryModel;
@@ -18,10 +18,10 @@ import org.mbaum.serviio.model.OnlineRepositoryModel;
 public class OnlineRepositoryPanel implements View
 {
 	private final JComponent mPanel;
-	private final Model<OnlineRepositoryModel> mModel;
-	private Listener<Model<OnlineRepositoryModel>> mModelListener;
+	private final MutableModel<OnlineRepositoryModel> mModel;
+	private Listener<MutableModel<OnlineRepositoryModel>> mModelListener;
 	
-	public OnlineRepositoryPanel( Model<OnlineRepositoryModel> model )
+	public OnlineRepositoryPanel( MutableModel<OnlineRepositoryModel> model )
 	{
 		mModel = model;
 		mPanel = buildPanel( mModel );
@@ -31,7 +31,7 @@ public class OnlineRepositoryPanel implements View
 	
 	public OnlineRepositoryPanel()
 	{
-		this( createModel( OnlineRepositoryModel.class ) );
+		this( createMutableModel( OnlineRepositoryModel.class ) );
 	}
 	
 	@Override
@@ -46,19 +46,19 @@ public class OnlineRepositoryPanel implements View
 	    return mPanel;
     }
 	
-	private Listener<Model<OnlineRepositoryModel>> createModelListener()
+	private Listener<MutableModel<OnlineRepositoryModel>> createModelListener()
     {
-	    return new Listener<Model<OnlineRepositoryModel>>()
+	    return new Listener<MutableModel<OnlineRepositoryModel>>()
 	    {
 	    	@Override
-	    	public void handleChanged( Model<OnlineRepositoryModel> model )
+	    	public void handleChanged( MutableModel<OnlineRepositoryModel> model )
 	    	{
 	    		updatePanel();
 	    	}
 	    };
     }
 
-	private JComponent buildPanel( Model<OnlineRepositoryModel> model )
+	private JComponent buildPanel( MutableModel<OnlineRepositoryModel> model )
     {
 		JPanel panel = new JPanel();
 		GroupLayout layout = new GroupLayout( panel );

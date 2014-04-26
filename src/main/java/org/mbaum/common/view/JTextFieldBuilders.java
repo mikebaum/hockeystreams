@@ -10,49 +10,75 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mbaum.common.Destroyable;
 import org.mbaum.common.listener.Listener;
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.ModelSpec;
 import org.mbaum.common.model.MutableModelValue;
 import org.mbaum.common.view.ViewBuilder.ViewImpl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 
 public class JTextFieldBuilders
 {
 	private static final Function<String, String> STRING_IDENTITY_EXTRACTOR = Functions.identity();
 	
-	public static <M extends Model<M>, T> ViewBuilder textFieldBuilder( final MutableModelValue<M, T> modelValue, 
-	                                                                    final Function<String, T> modelValueExtractor )
+	public static final Supplier<JTextField> TEXT_FIELD_SUPPLIER = 
+    	new Supplier<JTextField>()
+        {
+            @Override
+            public JTextField get()
+            {
+                return new JTextField();
+            }
+        };
+        
+    public static final Supplier<JTextField> PASSOWRD_FIELD_SUPPLIER = 
+        new Supplier<JTextField>()
+        {
+            @Override
+            public JTextField get()
+            {
+                return new JPasswordField();
+            }
+        };
+	
+	public static <M extends ModelSpec, T> ViewBuilder textFieldBuilder( final MutableModelValue<M, T> modelValue, 
+	                                                                      final Function<String, T> modelValueExtractor,
+	                                                                      final Supplier<JTextField> textComponentSupplier )
 	{
 		return new ViewBuilder()
         {
             @Override
             public View buildView()
             {
-                return buildTextField( modelValue, modelValueExtractor, new JTextField() );
+                Preconditions.checkState( SwingUtilities.isEventDispatchThread(),
+                                          "Cannot construct a text field view unless you are on the EDT." );
+                return buildTextField( modelValue, modelValueExtractor, textComponentSupplier.get() );
             }
         };
 	}
 	
-	public static <M extends Model<M>> ViewBuilder textFieldBuilder( MutableModelValue<M, String> modelValue )
+	public static <M extends ModelSpec> ViewBuilder textFieldBuilder( MutableModelValue<M, String> modelValue )
 	{
-		return textFieldBuilder( modelValue, STRING_IDENTITY_EXTRACTOR );
+		return textFieldBuilder( modelValue, STRING_IDENTITY_EXTRACTOR, TEXT_FIELD_SUPPLIER );
 	}
 	
-	public static <M extends Model<M>> View passwordFieldBuilder( MutableModelValue<M, String> modelValue )
+	public static <M extends ModelSpec> ViewBuilder passwordFieldBuilder( MutableModelValue<M, String> modelValue )
 	{
-		return buildTextField( modelValue, STRING_IDENTITY_EXTRACTOR, new JPasswordField() );
+		return textFieldBuilder( modelValue, STRING_IDENTITY_EXTRACTOR, PASSOWRD_FIELD_SUPPLIER );
 	}
 	
-	private static <M extends Model<M>, T> View buildTextField( final MutableModelValue<M, T> modelValue,
-	                                                            Function<String, T> modelValueExtractor, 
-	                                                            final JTextField textField )
+	private static <M extends ModelSpec, T> View buildTextField( final MutableModelValue<M, T> modelValue,
+	                                                              Function<String, T> modelValueExtractor, 
+	                                                              final JTextField textField )
 	{
 		final JPanel panel = new JPanel();
 		
@@ -85,7 +111,7 @@ public class JTextFieldBuilders
 		}, panel );
 	}
 	
-	private static <M extends Model<M>, T> DocumentListener 
+	private static <M extends ModelSpec, T> DocumentListener 
 	    createDocumentListener( final JTextField textField, 
 	                            final MutableModelValue<M, T> modelValue,
 	                            final Function<String, T> modelValueExtractor )

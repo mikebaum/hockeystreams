@@ -1,6 +1,6 @@
 package org.mbaum.common.action;
 
-import static org.mbaum.common.model.Model.Builder.createModel;
+import static org.mbaum.common.model.MutableModel.Builder.createMutableModel;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class ActionModelImpl extends ForwardingModel<ActionModel> implements Act
 
 	public ActionModelImpl()
     {
-	    super( createModel( ActionModel.class ) );
+	    super( createMutableModel( ActionModel.class ) );
     }
 	
 	@Override

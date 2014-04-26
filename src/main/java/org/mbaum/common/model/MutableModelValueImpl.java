@@ -6,7 +6,7 @@ import org.mbaum.common.listener.ListenableSupport;
 import org.mbaum.common.listener.Listener;
 import org.mbaum.common.value.Value;
 
-class MutableModelValueImpl<M extends Model<M>, T> implements MutableModelValue<M, T>
+class MutableModelValueImpl<M extends ModelSpec, T> implements MutableModelValue<M, T>
 {
 	private final Value<T> mValue;
 	private final ListenableSupport<T, Listener<T>> mListenableSupport;
@@ -18,6 +18,12 @@ class MutableModelValueImpl<M extends Model<M>, T> implements MutableModelValue<
 		mId = id;
 		mListenableSupport = createListenableSupport( this );
 	}
+    
+    @Override
+    public void destroy()
+    {
+        mListenableSupport.destroy();
+    }
 
 	@Override
 	public T get()
@@ -54,12 +60,6 @@ class MutableModelValueImpl<M extends Model<M>, T> implements MutableModelValue<
     public void removeListener( Listener<T> listener )
     {
 		mListenableSupport.addListener( listener );
-    }
-
-	@Override
-    public void clearListeners()
-    {
-		mListenableSupport.clearListeners();
     }
 
     @Override

@@ -16,18 +16,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.model.ProgressPanelModel;
 
 public class ProgressPanelExecutor implements ProcessExecutorService
 {
     private static final Logger LOGGER = Logger.getLogger( ProgressPanelExecutor.class );
 	
-    private final Model<ProgressPanelModel> mProgressPanelModel;
+    private final MutableModel<ProgressPanelModel> mProgressPanelModel;
 	private final ExecutorService mExecutorService;
     private final String mExecutorName;
 
-	private ProgressPanelExecutor( Model<ProgressPanelModel> progressPanelModel, ExecutorService executorService, String executorName )
+	private ProgressPanelExecutor( MutableModel<ProgressPanelModel> progressPanelModel, ExecutorService executorService, String executorName )
 	{
 		mProgressPanelModel = progressPanelModel;
 		mExecutorService = executorService;
@@ -164,7 +164,7 @@ public class ProgressPanelExecutor implements ProcessExecutorService
 	}
 
 	private static <R, C extends ProcessContext> ResultHandler<R> 
-		createDefaultResultHandler( final Model<ProgressPanelModel> progressPanelModel, 
+		createDefaultResultHandler( final MutableModel<ProgressPanelModel> progressPanelModel, 
 									final Process<C, R> process )
 	{
 		return new ResultHandler<R>()
@@ -177,7 +177,7 @@ public class ProgressPanelExecutor implements ProcessExecutorService
 		};
 	}
 	
-	private static <R> ProcessListener<R> createProcessListener( final Model<ProgressPanelModel> progressPanelModel, 
+	private static <R> ProcessListener<R> createProcessListener( final MutableModel<ProgressPanelModel> progressPanelModel, 
 																 final String processDescription,
 																 final ResultHandler<R> resultHander )
 	{
@@ -210,7 +210,7 @@ public class ProgressPanelExecutor implements ProcessExecutorService
 		};
 	}
 
-	public static ProcessExecutorService createProgressPanelExecutor( Model<ProgressPanelModel> progressPanelModel, 
+	public static ProcessExecutorService createProgressPanelExecutor( MutableModel<ProgressPanelModel> progressPanelModel, 
 																	  final String executorName )
 	{
 		ThreadPoolExecutor exector = new ScheduledThreadPoolExecutor( 1, new ThreadFactory()

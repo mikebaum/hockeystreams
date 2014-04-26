@@ -12,7 +12,7 @@ import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessListener;
 import org.mbaum.common.execution.ProcessListenerAdapter;
 import org.mbaum.common.listener.Listener;
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.MutableModel;
 
 import com.google.common.base.Preconditions;
 
@@ -23,14 +23,14 @@ final class ActionExecutableImpl<T> implements ActionExecutable
     private final Executor mExecutor;
     private final ExecutableProcess<T> mExecutableProcess;
     private final ProcessListener<T> mProcessListener;
-    private final Model<ActionModel> mActionModel;
-    private final Listener<Model<ActionModel>> mActionModelListener;
+    private final MutableModel<ActionModel> mActionModel;
+    private final Listener<MutableModel<ActionModel>> mActionModelListener;
     
     private ActionExecutableListener mListener = WARNING_LISTENER;
 
     
     private ActionExecutableImpl( ExecutableProcess<T> executableProcess, 
-                                  Model<ActionModel> actionModel, 
+                                  MutableModel<ActionModel> actionModel, 
                                   Executor executor )
     {
         mActionModel = actionModel;
@@ -114,12 +114,12 @@ final class ActionExecutableImpl<T> implements ActionExecutable
         };
     }
 
-    private static <T> Listener<Model<ActionModel>> createActionModelListener( final ActionExecutableImpl<T> actionExecutable )
+    private static <T> Listener<MutableModel<ActionModel>> createActionModelListener( final ActionExecutableImpl<T> actionExecutable )
     {
-        return new Listener<Model<ActionModel>>()
+        return new Listener<MutableModel<ActionModel>>()
         {
             @Override
-            public void handleChanged( Model<ActionModel> model )
+            public void handleChanged( MutableModel<ActionModel> model )
             {
                 actionExecutable.fireActionEnabledChanged();
             }
@@ -127,7 +127,7 @@ final class ActionExecutableImpl<T> implements ActionExecutable
     }
     
     public static <T> ActionExecutable createActionExecutable( ExecutableProcess<T> executableProcess, 
-                                                               ActionModel actionModel, 
+                                                               MutableModel<ActionModel> actionModel, 
                                                                Executor executor )
     {
     	return new ActionExecutableImpl<T>( executableProcess, actionModel, executor );

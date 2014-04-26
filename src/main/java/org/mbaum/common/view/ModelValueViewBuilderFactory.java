@@ -1,10 +1,11 @@
 package org.mbaum.common.view;
 
+import static org.mbaum.common.view.JTextFieldBuilders.TEXT_FIELD_SUPPLIER;
 import static org.mbaum.common.view.JTextFieldBuilders.textFieldBuilder;
 
 import java.util.Map;
 
-import org.mbaum.common.model.Model;
+import org.mbaum.common.model.ModelSpec;
 import org.mbaum.common.model.MutableModelValue;
 
 import com.google.common.base.Function;
@@ -57,7 +58,7 @@ public interface ModelValueViewBuilderFactory<T>
 			} );
 		}
 		
-		public static <M extends Model<M>, T> ViewBuilder getModelValueUIBuilder( final MutableModelValue<M, T> value )
+		public static <M extends ModelSpec, T> ViewBuilder getModelValueUIBuilder( final MutableModelValue<M, T> value )
 		{
 			for( Map.Entry<Class<?>, ModelValueViewBuilderFactory<?>> entry : FACTORIES.entrySet() )
 			{				
@@ -72,7 +73,7 @@ public interface ModelValueViewBuilderFactory<T>
 			@SuppressWarnings("unchecked")
             Function<String, T> converter = (Function<String, T>) CONVERTERS.getConverter( (Class<T>) value.get().getClass() );
 
-			return textFieldBuilder( value, converter );
+			return textFieldBuilder( value, converter, TEXT_FIELD_SUPPLIER );
 		}
 	}
 }

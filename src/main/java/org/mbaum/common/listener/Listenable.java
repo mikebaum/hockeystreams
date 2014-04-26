@@ -1,10 +1,10 @@
 package org.mbaum.common.listener;
 
-public interface Listenable<T, L extends Listener<T>>
+import org.mbaum.common.Destroyable;
+
+public interface Listenable<T, L extends Listener<T>> extends Destroyable
 {
 	void addListener( L listener );
 	
 	void removeListener( L listener );
-	
-	void clearListeners();
 }
