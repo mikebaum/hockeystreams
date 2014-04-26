@@ -1,6 +1,5 @@
-package org.mbaum.hockeystreams;
+package org.mbaum.common.component;
 
-import org.mbaum.common.Component;
 import org.mbaum.common.Destroyable;
 import org.mbaum.common.DestroyableSupport;
 

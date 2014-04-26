@@ -24,9 +24,10 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.mbaum.common.Component;
 import org.mbaum.common.Destroyable;
 import org.mbaum.common.action.ActionExecutable;
+import org.mbaum.common.component.AbstractComponent;
+import org.mbaum.common.component.Component;
 import org.mbaum.common.execution.ExecutableProcess;
 import org.mbaum.common.execution.ProcessExecutorService;
 import org.mbaum.common.execution.ProcessListener;
