@@ -7,3 +7,5 @@
 *.war
 *.ear
 /target
+/hockeystreams.app
+/logs
