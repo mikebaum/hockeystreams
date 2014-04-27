@@ -134,7 +134,9 @@
 		</dependency>
 	</dependencies>
 	<modules>
-		<module>test-module</module>
-		<module>GuiFramework-Java</module>
+		
+		
+		
+		<module>gui-framework</module>
 	</modules>
 </project>
