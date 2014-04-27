@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>hockeystreams</groupId>
 	<artifactId>hockeystreams</artifactId>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<build>
 		<!-- <sourceDirectory>source</sourceDirectory> <resources> <resource> <directory>source</directory> 
@@ -133,4 +133,8 @@
 			<version>20140107</version>
 		</dependency>
 	</dependencies>
+	<modules>
+		<module>test-module</module>
+		<module>GuiFramework-Java</module>
+	</modules>
 </project>
