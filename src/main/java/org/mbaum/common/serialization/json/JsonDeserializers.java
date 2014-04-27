@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.mbaum.common.model.ModelSpec;
 import org.mbaum.common.model.ModelValueId;
@@ -33,14 +31,6 @@ public class JsonDeserializers
                 {
                     return (R) new ObjectMapper().readValue( jsonString, resultClass );
                 }
-                catch ( JsonParseException e )
-                {
-                    throw new JsonException( "Exception while parsing: " + jsonString + "", e );
-                }
-                catch ( JsonMappingException e )
-                {
-                    throw new JsonException( "Exception while parsing: " + jsonString + "", e );
-                }
                 catch ( IOException e )
                 {
                     throw new JsonException( "Exception while parsing: " + jsonString + "", e );
@@ -62,21 +52,9 @@ public class JsonDeserializers
                     HashMap<String, Object> result = new ObjectMapper().readValue( jsonString, HashMap.class );
                     return createMutableModelFromMap( modelClass, result );
                 }
-                catch ( JsonParseException e )
+                catch ( IOException|ObjectConversionException exception )
                 {
-                    throw new JsonException( "Exception while parsing: " + jsonString + "", e );
-                }
-                catch ( JsonMappingException e )
-                {
-                    throw new JsonException( "Exception while parsing: " + jsonString + "", e );
-                }
-                catch ( IOException e )
-                {
-                    throw new JsonException( "Exception while parsing: " + jsonString + "", e );
-                }
-                catch ( ObjectConversionException e )
-                {
-                    throw new JsonException( "Exception while parsing: " + jsonString + "", e );
+                    throw new JsonException( "Exception while parsing: " + jsonString + "", exception );
                 }
             }
         };
@@ -99,8 +77,8 @@ public class JsonDeserializers
     }
 
     private static <M extends ModelSpec, T> void setModelValue( MutableModel<M> model,
-                                                                 ModelValueId<M, T> id,
-                                                                 Object value ) throws ObjectConversionException
+                                                                ModelValueId<M, T> id,
+                                                                Object value ) throws ObjectConversionException
     {
         model.setValue( checkNotNull( id ), id.valueFrom( value ) );
     }
