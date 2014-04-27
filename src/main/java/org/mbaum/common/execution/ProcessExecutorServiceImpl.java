@@ -1,8 +1,5 @@
 package org.mbaum.common.execution;
 
-import static org.mbaum.common.model.ProgressPanelModel.INDETERMINATE;
-import static org.mbaum.common.model.ProgressPanelModel.MESSAGE;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -16,20 +13,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
-import org.mbaum.common.model.MutableModel;
-import org.mbaum.common.model.ProgressPanelModel;
 
-public class ProgressPanelExecutor implements ProcessExecutorService
+public class ProcessExecutorServiceImpl implements ProcessExecutorService
 {
-    private static final Logger LOGGER = Logger.getLogger( ProgressPanelExecutor.class );
+    private static final Logger LOGGER = Logger.getLogger( ProcessExecutorServiceImpl.class );
 	
-    private final MutableModel<ProgressPanelModel> mProgressPanelModel;
-	private final ExecutorService mExecutorService;
+    private final ExecutableProcessBuilder mExecutableProcessBuilder;
+    private final ExecutorService mExecutorService;
     private final String mExecutorName;
 
-	private ProgressPanelExecutor( MutableModel<ProgressPanelModel> progressPanelModel, ExecutorService executorService, String executorName )
+    private ProcessExecutorServiceImpl( ExecutableProcessBuilder executableProcessBuilder,
+                                         ExecutorService executorService, 
+                                         String executorName )
 	{
-		mProgressPanelModel = progressPanelModel;
+		mExecutableProcessBuilder = executableProcessBuilder;
 		mExecutorService = executorService;
         mExecutorName = executorName;
         LOGGER.info( "Created executor thread: " + mExecutorName );
@@ -143,75 +140,21 @@ public class ProgressPanelExecutor implements ProcessExecutorService
 				                C context, 
 				                ProcessListener<R> listener )
 	{
-		return buildExecutableProcess( process, context, listener, createDefaultResultHandler( mProgressPanelModel, process ) );
+	    return mExecutableProcessBuilder.buildExecutableProcess( process, context, listener );
 	}
 
 	@Override
 	public <C extends ProcessContext, R> ExecutableProcess<R> 
-		buildExecutableProcess( Process<C, R> process, C context, 
+		buildExecutableProcess( Process<C, R> process,
+		                        C context, 
 				                ProcessListener<R> listener, 
 				                ResultHandler<R> resultHandler )
 	{
-		ExecutableProcess<R> executableProcess = 
-		    ProcessUtils.createExecutableProcess( process, context, listener );
-		
-		ProcessListener<R> createProcessListener = createProcessListener( mProgressPanelModel, 
-																		  process.getDescription(), 
-																		  resultHandler );
-		executableProcess.addListener( createProcessListener );
-		
-		return executableProcess;
+	    return mExecutableProcessBuilder.buildExecutableProcess( process, context, listener, resultHandler );
 	}
 
-	private static <R, C extends ProcessContext> ResultHandler<R> 
-		createDefaultResultHandler( final MutableModel<ProgressPanelModel> progressPanelModel, 
-									final Process<C, R> process )
-	{
-		return new ResultHandler<R>()
-		{
-			@Override
-			public void handleResult( R result )
-			{
-				progressPanelModel.setValue( MESSAGE, process.getDescription() + " complete" );
-			}
-		};
-	}
-	
-	private static <R> ProcessListener<R> createProcessListener( final MutableModel<ProgressPanelModel> progressPanelModel, 
-																 final String processDescription,
-																 final ResultHandler<R> resultHander )
-	{
-		return new ProcessListener<R>()
-		{
-			@Override
-			public void handleStarted()
-			{
-				progressPanelModel.setValue( MESSAGE, "Performing: " + processDescription );
-				progressPanelModel.setValue( INDETERMINATE, true );
-			}
-
-			@Override
-			public void handleResult( R result )
-			{
-				resultHander.handleResult( result );
-			}
-
-			@Override
-			public void handleFailed( Exception exception )
-			{
-				progressPanelModel.setValue( MESSAGE, processDescription + " failed" );
-			}
-
-			@Override
-			public void handleFinished()
-			{
-				progressPanelModel.reset();
-			}
-		};
-	}
-
-	public static ProcessExecutorService createProgressPanelExecutor( MutableModel<ProgressPanelModel> progressPanelModel, 
-																	  final String executorName )
+	public static ProcessExecutorService createExecutorService( ExecutableProcessBuilder executableProcessBuilder,
+	                                                            final String executorName )
 	{
 		ThreadPoolExecutor exector = new ScheduledThreadPoolExecutor( 1, new ThreadFactory()
 		{
@@ -221,6 +164,7 @@ public class ProgressPanelExecutor implements ProcessExecutorService
 				return new Thread( runnable, executorName );
 			}
 		} );
-		return new ProgressPanelExecutor( progressPanelModel, exector, executorName );
+		
+		return new ProcessExecutorServiceImpl( executableProcessBuilder, exector, executorName );
 	}
 }

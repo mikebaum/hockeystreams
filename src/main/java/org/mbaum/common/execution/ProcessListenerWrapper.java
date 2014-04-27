@@ -1,5 +1,7 @@
 package org.mbaum.common.execution;
 
+import org.mbaum.common.Invoker;
+
 public class ProcessListenerWrapper<R> implements ProcessListener<R>
 {
     private final Invoker mInvoker;

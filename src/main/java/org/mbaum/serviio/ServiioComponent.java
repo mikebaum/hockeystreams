@@ -3,7 +3,6 @@ package org.mbaum.serviio;
 import static org.mbaum.common.action.ActionUtils.buildActionExecutable;
 import static org.mbaum.common.action.ActionUtils.createAction;
 import static org.mbaum.common.action.ActionUtils.createActionModel;
-import static org.mbaum.common.execution.ProgressPanelExecutor.createProgressPanelExecutor;
 import static org.mbaum.common.model.MutableModel.Builder.createMutableModel;
 import static org.mbaum.common.veto.Vetoers.createVetoer;
 import static org.mbaum.serviio.model.ServiioModel.HOST_NAME;
@@ -26,14 +25,13 @@ import org.mbaum.common.Destroyable;
 import org.mbaum.common.action.ActionExecutable;
 import org.mbaum.common.component.AbstractComponent;
 import org.mbaum.common.component.Component;
+import org.mbaum.common.component.execution.progresspanel.ProgressPanelExectorComponent;
 import org.mbaum.common.execution.ExecutableProcess;
-import org.mbaum.common.execution.ProcessExecutorService;
 import org.mbaum.common.execution.ProcessListener;
 import org.mbaum.common.execution.ProcessListenerAdapter;
 import org.mbaum.common.model.Model;
 import org.mbaum.common.model.ModelValidator;
 import org.mbaum.common.model.MutableModel;
-import org.mbaum.common.model.ProgressPanelModel;
 import org.mbaum.common.view.ActionPanel;
 import org.mbaum.common.view.View;
 import org.mbaum.common.view.ViewBuilder;
@@ -61,8 +59,7 @@ public class ServiioComponent extends AbstractComponent implements Component
 	private final ExecutableProcess<PingResponse> mPingAction;
 	private final ExecutableProcess<MutableModel<RepositoryModel>> mRepositoryProcess;
 	private final ExecutableProcess<PingResponse> mUpdateRepositoryProcess;
-	private final MutableModel<ProgressPanelModel> mProgressPanelModel;
-	private final ProcessExecutorService mServiioProcessExecutor;
+	private final ProgressPanelExectorComponent mExecutorComponent;
     private final ActionExecutable mPingActionExecutable;
 	private final ActionExecutable mRepositoryActionExecutable;
 	private final ActionExecutable mUpdateRepositoryActionExecutable;
@@ -72,20 +69,19 @@ public class ServiioComponent extends AbstractComponent implements Component
 	public ServiioComponent()
 	{
 		mServiioModel = d( createMutableModel( ServiioModel.class ) );
-		mProgressPanelModel = d( createMutableModel( ProgressPanelModel.class ) );
-		mServiioProcessExecutor = createProgressPanelExecutor( mProgressPanelModel, "ServiioRESTApiExecutor" );
+		mExecutorComponent = d( new ProgressPanelExectorComponent( "HockeyStreamsRESTApiExecutor" ) );
 
-		mPingAction = d( mServiioProcessExecutor.buildExecutableProcess( PING_PROCESS, 
-		                                                                 createPingContext( mServiioModel ), 
-		                                                                 createPingProcessListener() ) );
+		mPingAction = d( mExecutorComponent.buildExecutableProcess( PING_PROCESS, 
+		                                                            createPingContext( mServiioModel ), 
+		                                                            createPingProcessListener() ) );
 		
 		mPingActionExecutable = d( buildActionExecutable( mPingAction, 
 								        				  createActionModel( PING, 
 										    			                     createVetoer( mServiioModel, 
 											    		                                   createServiioModelValidator() ) ),
-						                                  mServiioProcessExecutor ) );
+											    		  mExecutorComponent ) );
 		
-		mRepositoryProcess = d( mServiioProcessExecutor.buildExecutableProcess( REPOSITORY_PROCESS, 
+		mRepositoryProcess = d( mExecutorComponent.buildExecutableProcess( REPOSITORY_PROCESS, 
 																			    createRepositoryContext( mServiioModel ), 
 																			    createRepositoryProcessListener( mServiioModel ) ) );
 
@@ -94,23 +90,23 @@ public class ServiioComponent extends AbstractComponent implements Component
 				   						        				createActionModel( GET_REPOSITORY, 
 				   								    			                   createVetoer( mServiioModel, 
 				   												    	 						 createServiioModelValidator() ) ),
-				   										        mServiioProcessExecutor ) );
+				   												mExecutorComponent ) );
 		
-		mRefreshRepoActionExecutable = d( mServiioProcessExecutor.buildExecutableProcess( ACTION_PROCESS, 
-																					      createActionContext( mServiioModel ), 
-																					      createPingProcessListener() ) );
+		mRefreshRepoActionExecutable = d( mExecutorComponent.buildExecutableProcess( ACTION_PROCESS, 
+		                                                                             createActionContext( mServiioModel ), 
+		                                                                             createPingProcessListener() ) );
 		
 		mUpdateRepositoryProcess = 
-		    d( mServiioProcessExecutor.buildExecutableProcess( UPDATE_REPOSITORY_PROCESS, 
-		                                                       createRepositoryContext( mServiioModel ), 
-		                                                       createUpdateRepositoryProcessListener( mRefreshRepoActionExecutable ) ) );
+		    d( mExecutorComponent.buildExecutableProcess( UPDATE_REPOSITORY_PROCESS, 
+		                                                  createRepositoryContext( mServiioModel ), 
+		                                                  createUpdateRepositoryProcessListener( mRefreshRepoActionExecutable ) ) );
 
 
 		mUpdateRepositoryActionExecutable = d( buildActionExecutable( mUpdateRepositoryProcess, 
 		                                                              createActionModel( UPDATE_REPOSITORY, 
 		                                                                                 createVetoer( mServiioModel, 
 		                                                                                               createServiioModelValidator() ) ),
-		                                                                                 mServiioProcessExecutor ) );
+		                                                              mExecutorComponent ) );
 		
         mView = d( buildView( mServiioModel, mPingActionExecutable, mRepositoryActionExecutable, mUpdateRepositoryActionExecutable ) );
 	}

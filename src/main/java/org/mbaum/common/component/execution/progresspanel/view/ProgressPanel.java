@@ -1,4 +1,4 @@
-package org.mbaum.common.view;
+package org.mbaum.common.component.execution.progresspanel.view;
 
 import static org.mbaum.common.model.ProgressPanelModel.INDETERMINATE;
 import static org.mbaum.common.model.ProgressPanelModel.MESSAGE;
@@ -13,23 +13,29 @@ import javax.swing.JProgressBar;
 import org.mbaum.common.listener.Listener;
 import org.mbaum.common.model.MutableModel;
 import org.mbaum.common.model.ProgressPanelModel;
+import org.mbaum.common.view.View;
 
 public class ProgressPanel implements View
 {
-    private final JProgressBar mProgressBar;
+    private final MutableModel<ProgressPanelModel> mModel;
     private final JComponent mPanel;
+    private final Listener<MutableModel<ProgressPanelModel>> mModelListener;
     
     public ProgressPanel( MutableModel<ProgressPanelModel> model )
     {
-        mProgressBar = createProgressBar();
-        mPanel = initGui( mProgressBar );
-        model.addListener( createProgressModelListener( mProgressBar ) );
+        mModel = model;
+        JProgressBar progressBar = createProgressBar();
+        
+        mModelListener = createProgressModelListener( progressBar );
+        model.addListener( mModelListener );
+        
+        mPanel = initGui( progressBar );
     }
     
 	@Override
     public void destroy()
     {
-	    // TODO Auto-generated method stub
+	    mModel.removeListener( mModelListener );
     }
 
 	public JComponent getComponent()
