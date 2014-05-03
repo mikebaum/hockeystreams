@@ -3,7 +3,7 @@ package org.mbaum.common.action;
 import static org.mbaum.common.action.ActionExecutableListener.WARNING_LISTENER;
 import static org.mbaum.common.action.ActionModel.DESCRIPTION;
 import static org.mbaum.common.action.ActionModel.ENABLED;
-import static org.mbaum.common.execution.ProcessUtils.createExecutbleProcessRunnable;
+import static org.mbaum.common.execution.ProcessUtils.createExecutableProcessRunnable;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,7 +27,6 @@ final class ActionExecutableImpl<T> implements ActionExecutable
     private final Listener<MutableModel<ActionModel>> mActionModelListener;
     
     private ActionExecutableListener mListener = WARNING_LISTENER;
-
     
     private ActionExecutableImpl( ExecutableProcess<T> executableProcess, 
                                   MutableModel<ActionModel> actionModel, 
@@ -71,7 +70,7 @@ final class ActionExecutableImpl<T> implements ActionExecutable
     public void execute()
     {
         checkThread();
-        mExecutor.execute( createExecutbleProcessRunnable( mExecutableProcess ) );
+        mExecutor.execute( createExecutableProcessRunnable( mExecutableProcess ) );
     }
 
     private void setExecuting( boolean isExecuting )

@@ -33,6 +33,7 @@ public class ProgressPanelExecutableProcessBuilder implements ExecutableProcessB
 
         ProcessListener<R> createProcessListener =
             createProcessListener( mProgressPanelModel, process.getDescription(), resultHandler );
+        
         executableProcess.addListener( createProcessListener );
 
         return executableProcess;

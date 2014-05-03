@@ -17,7 +17,7 @@ public class ProcessUtils
         return ExecutableProcessImpl.createExecutableProcess( process, context, listener );
     }
     
-    public static <R> Runnable createExecutbleProcessRunnable( final ExecutableProcess<R> executableProcess )
+    public static <R> Runnable createExecutableProcessRunnable( final ExecutableProcess<R> executableProcess )
     {
         return new Runnable()
         {
