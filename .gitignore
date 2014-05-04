@@ -6,8 +6,16 @@
 *.jar
 *.war
 *.ear
-/target
 /hockeystreams.app
 /logs
-/.settings
 /lib/
+/.gradle
+/build
+/bin
+
+# ide specific files
+# eclipse
+.classpath
+/.settings
+.project
+

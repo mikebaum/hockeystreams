@@ -1,0 +1,39 @@
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+
+    repositories {
+        mavenCentral()
+    }
+
+    version = '1.0'
+
+    jar {
+        manifest.attributes provider: 'gradle'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: "eclipse"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'commons-io:commons-io:2.4'
+    compile 'org.apache.commons:commons-lang3:3.1'
+    compile 'com.google.guava:guava:17.0'
+    compile 'org.codehaus.jackson:jackson-core-asl:1.9.13'
+    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
+    compile 'log4j:log4j:1.2.17'
+    compile 'commons-codec:commons-codec:1.8'
+    compile 'commons-logging:commons-logging:1.1.3'
+    compile 'org.apache.httpcomponents:fluent-hc:4.3.1'
+    compile 'org.apache.httpcomponents:httpclient:4.3.1'
+    compile 'org.apache.httpcomponents:httpclient-cache:4.3.1'
+    compile 'org.apache.httpcomponents:httpcore:4.3'
+    compile 'org.apache.httpcomponents:httpmime:4.3.1'
+    compile 'org.reflections:reflections:0.9.9-RC1'
+    compile project(':gui-framework')
+}
