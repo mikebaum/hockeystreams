@@ -6,5 +6,5 @@ import org.mbaum.common.Destroyable;
 
 public interface View extends Destroyable
 {
-	JComponent getComponent();
+    JComponent getComponent();
 }

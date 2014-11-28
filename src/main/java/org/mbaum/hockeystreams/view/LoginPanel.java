@@ -22,8 +22,8 @@ import org.mbaum.hockeystreams.model.LoginPanelModel;
 public class LoginPanel implements View
 {
     private JPanel mPanel;
-	private View mUsernameView;
-	private View mPasswordView;
+    private View mUsernameView;
+    private View mPasswordView;
 
     public LoginPanel( MutableModel<LoginPanelModel> model, Action loginAction )
     {
@@ -31,41 +31,41 @@ public class LoginPanel implements View
         mPasswordView = passwordFieldBuilder( model.getModelValue( PASSWORD ) ).buildView();
         mPanel = createLoginPanel( mUsernameView, mPasswordView, loginAction );
     }
-    
+
     @SuppressWarnings("serial")
     public LoginPanel()
     {
-    	this( createMutableModel( LoginPanelModel.class ), new AbstractAction( "Login" )
-    	{
-			@Override
+        this( createMutableModel( LoginPanelModel.class ), new AbstractAction( "Login" )
+        {
+            @Override
             public void actionPerformed( ActionEvent e ){}
-		} );
+        } );
     }
-    
-	@Override
+
+    @Override
     public void destroy()
     {
-		mUsernameView.destroy();
-		mPasswordView.destroy();
+        mUsernameView.destroy();
+        mPasswordView.destroy();
     }
-    
+
     @Override
     public JComponent getComponent()
     {
         return mPanel;
     }
-    
+
     private static JPanel createLoginPanel( View usernameView, View passwordView, Action loginAction )
     {
         JPanel authenticationPanel = new JPanel();
 
         authenticationPanel.add( usernameView.getComponent() );
-		authenticationPanel.add( passwordView.getComponent() );
+        authenticationPanel.add( passwordView.getComponent() );
         authenticationPanel.add( new JButton( loginAction ) );
-        
+
         JPanel topPanel = new JPanel( new BorderLayout() );
         topPanel.add( authenticationPanel, BorderLayout.WEST );
-        
+
         return topPanel;
     }
 }

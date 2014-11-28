@@ -40,8 +40,8 @@ public class ModelValueIdUtils
     }
 
     public static <M extends ModelSpec, T> ModelValueId<M, T> createId( String name, 
-                                                                         T defaultValue, 
-                                                                         ObjectConverter<T> converter )
+                                                                        T defaultValue, 
+                                                                        ObjectConverter<T> converter )
     {
         return ModelSpec.IdBuilder.createId( name, defaultValue, converter );
     }

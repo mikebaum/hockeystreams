@@ -18,12 +18,12 @@ import com.google.common.collect.ImmutableSet;
 public class MutableModelImpl<M extends ModelSpec> implements MutableModel<M>
 {
     private final ModelValueSet<M, MutableModelValue<M, ?>> mModelValues = new ModelValueSet<M, MutableModelValue<M, ?>>();
-	private final ListenableSupport<MutableModel<M>, Listener<MutableModel<M>>> mListenableSupport;
-	
-	public static <M extends ModelSpec> MutableModel<M> of( List<ModelValueId<M, ?>> modelValueIds )
-	{
-	    return new MutableModelImpl<M>( createModelValues( modelValueIds ) );
-	}
+    private final ListenableSupport<MutableModel<M>, Listener<MutableModel<M>>> mListenableSupport;
+    
+    public static <M extends ModelSpec> MutableModel<M> of( List<ModelValueId<M, ?>> modelValueIds )
+    {
+        return new MutableModelImpl<M>( createModelValues( modelValueIds ) );
+    }
 	
     private MutableModelImpl( List<MutableModelValue<M, ?>> modelValues )
     {

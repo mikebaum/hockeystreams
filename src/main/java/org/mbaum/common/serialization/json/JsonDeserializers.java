@@ -18,8 +18,10 @@ import com.google.common.collect.ImmutableSet;
 
 public class JsonDeserializers
 {
-    private JsonDeserializers(){}
-    
+    private JsonDeserializers()
+    {
+    }
+
     public static <R> JsonDeserializer<R> createDefault( final Class<R> resultClass )
     {
         return new JsonDeserializer<R>()
@@ -38,7 +40,7 @@ public class JsonDeserializers
             }
         };
     }
-    
+
     public static <M extends ModelSpec> JsonDeserializer<MutableModel<M>> createMutableModelDeserializer( final Class<M> modelClass )
     {
         return new JsonDeserializer<MutableModel<M>>()
@@ -49,30 +51,32 @@ public class JsonDeserializers
                 try
                 {
                     @SuppressWarnings("unchecked")
-                    HashMap<String, Object> result = new ObjectMapper().readValue( jsonString, HashMap.class );
+                    HashMap<String, Object> result =
+                        new ObjectMapper().readValue( jsonString, HashMap.class );
                     return createMutableModelFromMap( modelClass, result );
                 }
-                catch ( IOException|ObjectConversionException exception )
+                catch ( IOException | ObjectConversionException exception )
                 {
-                    throw new JsonException( "Exception while parsing: " + jsonString + "", exception );
+                    throw new JsonException( "Exception while parsing: " + jsonString + "",
+                                             exception );
                 }
             }
         };
     }
-    
+
     public static <M extends ModelSpec> MutableModel<M> createMutableModelFromMap( Class<M> modelClass,
-                                                                                    Map<String, Object> result )
+                                                                                   Map<String, Object> result ) 
         throws ObjectConversionException
     {
         MutableModel<M> model = createMutableModel( modelClass );
         Map<String, ModelValueId<M, ?>> ids = getModelIdsMap( model );
-        
+
         for ( Map.Entry<String, Object> entry : result.entrySet() )
         {
             ModelValueId<M, ?> id = ids.get( entry.getKey() );
             setModelValue( model, id, entry.getValue() );
         }
-        
+
         return model;
     }
 
@@ -86,12 +90,12 @@ public class JsonDeserializers
     private static <M extends ModelSpec> ImmutableMap<String, ModelValueId<M, ?>> getModelIdsMap( MutableModel<M> model )
     {
         ImmutableSet<ModelValueId<M, ?>> ids = model.getIds();
-        
+
         ImmutableMap.Builder<String, ModelValueId<M, ?>> builder = ImmutableMap.builder();
-        
+
         for ( ModelValueId<M, ?> modelValueId : ids )
             builder.put( modelValueId.getName(), modelValueId );
-        
+
         return builder.build();
     }
 }

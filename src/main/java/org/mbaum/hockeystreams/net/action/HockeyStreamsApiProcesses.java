@@ -25,94 +25,110 @@ import org.mbaum.hockeystreams.net.transferobject.LoginResponse;
 
 public class HockeyStreamsApiProcesses
 {
-	private static final String HOCKEYSTREAMS_API_URL = "https://api.hockeystreams.com";
+    private static final String HOCKEYSTREAMS_API_URL = "https://api.hockeystreams.com";
 
-	private static final String LOGIN_PATH        = "/Login";
-	private static final String GET_LIVE_PATH     = "/GetLive";
-	private static final String IP_EXCEPTION_PATH = "/IPException";
+    private static final String LOGIN_PATH = "/Login";
+    private static final String GET_LIVE_PATH = "/GetLive";
+    private static final String IP_EXCEPTION_PATH = "/IPException";
 
-	public static final ModelValidator<LoginPanelModel>    LOGIN_VALIDATOR        = createLoginValidator();
-	public static final ModelValidator<HockeyStreamsModel> IP_EXCEPTION_VALIDATOR = createTokenValidator();
-	public static final ModelValidator<HockeyStreamsModel> GET_LIVE_VALIDATOR     = createTokenValidator();
-	
-    public static final Process<LoginContext, LoginResponse> 			 LOGIN_PROCESS           = createLoginProcess();
-    public static final Process<IpExectionsContext, IpExceptionResponse> IP_EXCEPTION_PROCESS    = createIpExceptionProcess();
-    public static final Process<GetLiveStreamsContext, GetLiveResponse>  GET_LIVE_STREAMS_ACTION = createGetLiveStreamsProcess();
-    
-    
+    public static final ModelValidator<LoginPanelModel> LOGIN_VALIDATOR = createLoginValidator();
+    public static final ModelValidator<HockeyStreamsModel> IP_EXCEPTION_VALIDATOR =
+        createTokenValidator();
+    public static final ModelValidator<HockeyStreamsModel> GET_LIVE_VALIDATOR =
+        createTokenValidator();
+
+    public static final Process<LoginContext, LoginResponse> LOGIN_PROCESS = createLoginProcess();
+    public static final Process<IpExectionsContext, IpExceptionResponse> IP_EXCEPTION_PROCESS =
+        createIpExceptionProcess();
+    public static final Process<GetLiveStreamsContext, GetLiveResponse> GET_LIVE_STREAMS_ACTION =
+        createGetLiveStreamsProcess();
+
     public static interface IpExectionsContext extends ProcessContext
     {
         Model<HockeyStreamsModel> getModel();
     }
-    
+
     public static interface GetLiveStreamsContext extends ProcessContext
     {
         Model<HockeyStreamsModel> getModel();
     }
-    
+
     public static interface LoginContext extends ProcessContext
     {
         Model<LoginPanelModel> getLoginPanelModel();
     }
-    
+
     private static Process<IpExectionsContext, IpExceptionResponse> createIpExceptionProcess()
     {
-        return new HttpProcess<IpExectionsContext, IpExceptionResponse>( newJsonParser( IpExceptionResponse.class ), 
-        		                      									 "generate ip exception" )
+        return new HttpProcess<IpExectionsContext, IpExceptionResponse>( newJsonParser( IpExceptionResponse.class ),
+                                                                         "generate ip exception" )
         {
-			@Override
-			protected HttpUriRequest buildRequest( IpExectionsContext context )
-			{
-				HttpEntity entity = 
-				        EntityBuilder.create()
-				                     .setParameters( new BasicNameValuePair( "token", context.getModel().getValue( SESSION_TOKEN ) ) )
-				                     .build();
-				
-				return RequestBuilder.post().setUri( HOCKEYSTREAMS_API_URL + IP_EXCEPTION_PATH )
-		                   				    .setEntity( entity )
-		                                    .addHeader( "content-type", "application/x-www-form-urlencoded" )
-		                                    .build();
-			}
+            @Override
+            protected HttpUriRequest buildRequest( IpExectionsContext context )
+            {
+                HttpEntity entity =
+                    EntityBuilder.create()
+                                 .setParameters( new BasicNameValuePair( "token",
+                                                                         context.getModel()
+                                                                                .getValue( SESSION_TOKEN ) ) )
+                                 .build();
+
+                return RequestBuilder.post()
+                                     .setUri( HOCKEYSTREAMS_API_URL + IP_EXCEPTION_PATH )
+                                     .setEntity( entity )
+                                     .addHeader( "content-type",
+                                                 "application/x-www-form-urlencoded" )
+                                     .build();
+            }
         };
     }
 
     private static Process<GetLiveStreamsContext, GetLiveResponse> createGetLiveStreamsProcess()
     {
-        return new HttpProcess<GetLiveStreamsContext, GetLiveResponse>( newJsonParser( GetLiveResponse.class ), "get live streams" )
+        return new HttpProcess<GetLiveStreamsContext, GetLiveResponse>( newJsonParser( GetLiveResponse.class ),
+                                                                        "get live streams" )
         {
-			@Override
-			protected HttpUriRequest buildRequest( GetLiveStreamsContext context )
-			{
-	            return RequestBuilder.get().setUri( HOCKEYSTREAMS_API_URL + GET_LIVE_PATH )
-	            		                   .addParameter( "token", context.getModel().getValue( SESSION_TOKEN ) )
-	            		                   .addHeader( "content-type", "application/x-www-form-urlencoded" )
-	            		                   .build();
-			}
+            @Override
+            protected HttpUriRequest buildRequest( GetLiveStreamsContext context )
+            {
+                return RequestBuilder.get()
+                                     .setUri( HOCKEYSTREAMS_API_URL + GET_LIVE_PATH )
+                                     .addParameter( "token",
+                                                    context.getModel().getValue( SESSION_TOKEN ) )
+                                     .addHeader( "content-type",
+                                                 "application/x-www-form-urlencoded" )
+                                     .build();
+            }
         };
     }
 
     private static Process<LoginContext, LoginResponse> createLoginProcess()
     {
-    	return new HttpProcess<LoginContext, LoginResponse>( newJsonParser( LoginResponse.class ), "login" )
+        return new HttpProcess<LoginContext, LoginResponse>( newJsonParser( LoginResponse.class ),
+                                                             "login" )
         {
-			@Override
-			protected HttpUriRequest buildRequest( LoginContext context )
-			{
-				Model<LoginPanelModel> loginPanelModel = context.getLoginPanelModel();
-				
-				HttpEntity entity = 
-			        EntityBuilder.create()
-								  .setParameters( new BasicNameValuePair( "username", loginPanelModel.getValue( USERNAME ) ),
-										  		  new BasicNameValuePair( "password", loginPanelModel.getValue( PASSWORD ) ),
-										  		  new BasicNameValuePair( "key", loginPanelModel.getValue( API_KEY ) ) )
-								  .build();
-				
-				return RequestBuilder.post()
-						             .setUri( HOCKEYSTREAMS_API_URL + LOGIN_PATH )
-						             .setEntity( entity )
-						             .addHeader( "content-type", "application/x-www-form-urlencoded" )
-						             .build();
-			}
+            @Override
+            protected HttpUriRequest buildRequest( LoginContext context )
+            {
+                Model<LoginPanelModel> loginPanelModel = context.getLoginPanelModel();
+
+                HttpEntity entity =
+                    EntityBuilder.create()
+                                 .setParameters( new BasicNameValuePair( "username",
+                                                                         loginPanelModel.getValue( USERNAME ) ),
+                                                 new BasicNameValuePair( "password",
+                                                                         loginPanelModel.getValue( PASSWORD ) ),
+                                                 new BasicNameValuePair( "key",
+                                                                         loginPanelModel.getValue( API_KEY ) ) )
+                                 .build();
+
+                return RequestBuilder.post()
+                                     .setUri( HOCKEYSTREAMS_API_URL + LOGIN_PATH )
+                                     .setEntity( entity )
+                                     .addHeader( "content-type",
+                                                 "application/x-www-form-urlencoded" )
+                                     .build();
+            }
         };
     }
 
@@ -123,7 +139,7 @@ public class HockeyStreamsApiProcesses
             @Override
             public boolean isValid( Model<HockeyStreamsModel> model )
             {
-                return ! StringUtils.isBlank( model.getValue( SESSION_TOKEN ) );
+                return !StringUtils.isBlank( model.getValue( SESSION_TOKEN ) );
             }
         };
     }
@@ -137,11 +153,11 @@ public class HockeyStreamsApiProcesses
             {
                 if ( StringUtils.isBlank( model.getValue( USERNAME ) ) )
                     return false;
-                
+
                 if ( StringUtils.isBlank( model.getValue( PASSWORD ) ) )
                     return false;
-                
-                return ! StringUtils.isBlank( model.getValue( API_KEY ) );
+
+                return !StringUtils.isBlank( model.getValue( API_KEY ) );
             }
         };
     }

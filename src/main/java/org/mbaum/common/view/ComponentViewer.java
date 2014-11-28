@@ -22,110 +22,110 @@ import com.google.common.collect.FluentIterable;
 
 public class ComponentViewer
 {
-	private final JFrame mFrame;
-	private final Set<Class<? extends View>> mViews;
-	private JPanel mContentPane;
-	private JPanel mViewSelectorPanel;
-	private JComboBox<?> mViewComboBox;
+    private final JFrame mFrame;
+    private final Set<Class<? extends View>> mViews;
+    private JPanel mContentPane;
+    private JPanel mViewSelectorPanel;
+    private JComboBox<?> mViewComboBox;
 
-	public ComponentViewer( Set<Class<? extends View>> views )
-	{
-		mViews = views;
-		mFrame = new JFrame( "Ui Viewer" );
-		buildGui();
-	}
-
-	private void buildGui()
+    public ComponentViewer( Set<Class<? extends View>> views )
     {
-		mFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-		mFrame.setSize( new Dimension( 500, 500 ) );
-		
-		mViewSelectorPanel = new JPanel();
-		mViewSelectorPanel.add( new JLabel( "Select View: " ) );
-		mViewComboBox = new JComboBox<Object>( mViews.toArray() );
-		mViewSelectorPanel.add( mViewComboBox );
-		mViewSelectorPanel.add( new JButton( createRefreshViewAction() ) );
-		
-		mContentPane = new JPanel( new BorderLayout() );
-		mContentPane.add( mViewSelectorPanel, BorderLayout.NORTH );
-		
-		mFrame.setContentPane( mContentPane );
-		mFrame.pack();
-		mFrame.setVisible( true );
+        mViews = views;
+        mFrame = new JFrame( "Ui Viewer" );
+        buildGui();
     }
-	
-	private void updateView( View  view )
-	{
-		if ( mCurrentView != null )
-			mContentPane.remove( mCurrentView );
-		
-		mCurrentView = view.getComponent();
-		
-		System.out.println("preferred size: " + mCurrentView.getPreferredSize());
-		System.out.println("maximum size: " + mCurrentView.getMaximumSize());
-		System.out.println("minimum size: " + mCurrentView.getMinimumSize());
-		
-		mContentPane.add( mCurrentView, BorderLayout.WEST );
-		mFrame.validate();
-		mFrame.pack();
-		mFrame.repaint();
-		
-		System.out.println("size size: " + mCurrentView.getSize());
-	}
 
-	@SuppressWarnings("serial")
+    private void buildGui()
+    {
+        mFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        mFrame.setSize( new Dimension( 500, 500 ) );
+
+        mViewSelectorPanel = new JPanel();
+        mViewSelectorPanel.add( new JLabel( "Select View: " ) );
+        mViewComboBox = new JComboBox<Object>( mViews.toArray() );
+        mViewSelectorPanel.add( mViewComboBox );
+        mViewSelectorPanel.add( new JButton( createRefreshViewAction() ) );
+
+        mContentPane = new JPanel( new BorderLayout() );
+        mContentPane.add( mViewSelectorPanel, BorderLayout.NORTH );
+
+        mFrame.setContentPane( mContentPane );
+        mFrame.pack();
+        mFrame.setVisible( true );
+    }
+
+    private void updateView( View  view )
+    {
+        if ( mCurrentView != null )
+            mContentPane.remove( mCurrentView );
+
+        mCurrentView = view.getComponent();
+
+        System.out.println("preferred size: " + mCurrentView.getPreferredSize());
+        System.out.println("maximum size: " + mCurrentView.getMaximumSize());
+        System.out.println("minimum size: " + mCurrentView.getMinimumSize());
+
+        mContentPane.add( mCurrentView, BorderLayout.WEST );
+        mFrame.validate();
+        mFrame.pack();
+        mFrame.repaint();
+
+        System.out.println("size size: " + mCurrentView.getSize());
+    }
+
+    @SuppressWarnings("serial")
     private AbstractAction createRefreshViewAction()
     {
-	    return new AbstractAction( "Load View" )
-	    {
-			@Override
+        return new AbstractAction( "Load View" )
+        {
+            @Override
             public void actionPerformed( ActionEvent arg0 )
             {
-				try
+                try
                 {
-					@SuppressWarnings("unchecked")
+                    @SuppressWarnings("unchecked")
                     Class<? extends View> clazz  = 
-							(Class<? extends View>) mViewComboBox.getSelectedItem();
-	                updateView ( clazz.newInstance() );
+                    (Class<? extends View>) mViewComboBox.getSelectedItem();
+                    updateView ( clazz.newInstance() );
                 }
                 catch ( Exception e )
                 {
-	                e.printStackTrace();
+                    e.printStackTrace();
                 }
             }};
     }
-	
-	public static void main( String[] args )
+
+    public static void main( String[] args )
     {
-		SwingUtilities.invokeLater( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				new ComponentViewer( findViews() );
-			}
-		} );
+        SwingUtilities.invokeLater( new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                new ComponentViewer( findViews() );
+            }
+        } );
     }
 
-	private static Set<Class<? extends View>> findViews()
+    private static Set<Class<? extends View>> findViews()
     {
-	    return FluentIterable.from( new Reflections().getSubTypesOf( View.class ) )
-							 .filter( HAS_DEFAULT_CONSTRUCTOR_PREDICATE )
-							 .toSet();
+        return FluentIterable.from( new Reflections().getSubTypesOf( View.class ) )
+        .filter( HAS_DEFAULT_CONSTRUCTOR_PREDICATE )
+        .toSet();
     }
 
-	private static Predicate<Class<? extends View>> HAS_DEFAULT_CONSTRUCTOR_PREDICATE =
-	    new Predicate<Class<? extends View>>()
-	    {
-	    	@Override
-	        public boolean apply( Class<? extends View> input )
-	        {
-	    		for ( Constructor<?> constructor :  input.getConstructors() )
-	    			if ( constructor.getParameterTypes().length == 0 )
-	    				return true;
-	    		
-	            return false;
-	        }
-	    };
-	private JComponent mCurrentView;
+    private static Predicate<Class<? extends View>> HAS_DEFAULT_CONSTRUCTOR_PREDICATE =
+    new Predicate<Class<? extends View>>()
+    {
+        @Override
+        public boolean apply( Class<? extends View> input )
+        {
+            for ( Constructor<?> constructor :  input.getConstructors() )
+                if ( constructor.getParameterTypes().length == 0 )
+                    return true;
+
+            return false;
+        }
+    };
+    private JComponent mCurrentView;
 }

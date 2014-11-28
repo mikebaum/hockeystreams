@@ -11,30 +11,30 @@ import org.mbaum.common.net.parse.ResponseParser;
 
 public abstract class HttpProcess<C extends ProcessContext, R> extends AbstractProcess<C, R>
 {
-	private static final Logger LOGGER = Logger.getLogger( HttpProcess.class );
-	private final ResponseParser<R> mResponseParser;
-	
-	protected HttpProcess( ResponseParser<R> responseParser, String description )
-	{
-		super( description );
-		mResponseParser = responseParser;
-	}
-	
-	@Override
-	public final R execute( C context ) throws Exception
-	{
-		HttpClient client = HttpClients.createDefault();
-		HttpUriRequest request = buildRequest( context );
-		
-		String requestLogString = request.getMethod() + " request: " + request.getURI().getPath();
-		LOGGER.info( "Executing " + requestLogString );
-		
-		HttpResponse response = client.execute( request );
-		
-		LOGGER.info( requestLogString + " complete" );
-		
-		return mResponseParser.parseResponse( response );
-	}
-	
-	protected abstract HttpUriRequest buildRequest( C context ) throws Exception;
+    private static final Logger LOGGER = Logger.getLogger( HttpProcess.class );
+    private final ResponseParser<R> mResponseParser;
+
+    protected HttpProcess( ResponseParser<R> responseParser, String description )
+    {
+        super( description );
+        mResponseParser = responseParser;
+    }
+
+    @Override
+    public final R execute( C context ) throws Exception
+    {
+        HttpClient client = HttpClients.createDefault();
+        HttpUriRequest request = buildRequest( context );
+
+        String requestLogString = request.getMethod() + " request: " + request.getURI().getPath();
+        LOGGER.info( "Executing " + requestLogString );
+
+        HttpResponse response = client.execute( request );
+
+        LOGGER.info( requestLogString + " complete" );
+
+        return mResponseParser.parseResponse( response );
+    }
+
+    protected abstract HttpUriRequest buildRequest( C context ) throws Exception;
 }
