@@ -16,7 +16,7 @@ public class ModelValueIdUtils
     public static <M extends ModelSpec> List<ModelValueId<M, ?>> getIds( Class<M> modelClass ) 
         throws IllegalAccessException
     {
-        // Comando Mode
+        // Commando Mode
         Field[] fields = modelClass.getDeclaredFields();
 
         Map<String, ModelValueId<M, ?>> modelValueIds = Maps.newHashMap();

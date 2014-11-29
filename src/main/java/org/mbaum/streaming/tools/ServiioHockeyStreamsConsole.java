@@ -89,7 +89,6 @@ public class ServiioHockeyStreamsConsole implements Destroyable
 	    
 	    try
         {
-	        
             SwingUtilities.invokeAndWait( new Runnable()
             {
                 @Override

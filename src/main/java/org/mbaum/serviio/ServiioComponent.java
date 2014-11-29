@@ -82,8 +82,8 @@ public class ServiioComponent extends AbstractComponent implements Component
 											    		  mExecutorComponent ) );
 		
 		mRepositoryProcess = d( mExecutorComponent.buildExecutableProcess( REPOSITORY_PROCESS, 
-																			    createRepositoryContext( mServiioModel ), 
-																			    createRepositoryProcessListener( mServiioModel ) ) );
+		                                                                   createRepositoryContext( mServiioModel ), 
+		                                                                   createRepositoryProcessListener( mServiioModel ) ) );
 
 		
 		mRepositoryActionExecutable = d( buildActionExecutable( mRepositoryProcess, 
